@@ -1,0 +1,2 @@
+C:/Users/mikag/Documents/Universiteit/3ba/BP/24-25/Research/Flutter/stress_measurement_app/stress_measurement_app/android/app/.cxx/Debug/5i3y4g4i/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/mikag/Documents/Universiteit/3ba/BP/24-25/Research/Flutter/stress_measurement_app/stress_measurement_app/android/app/.cxx/Debug/5i3y4g4i/x86_64/CMakeFiles/rebuild_cache.dir

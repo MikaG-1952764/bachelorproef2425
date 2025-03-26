@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Installed_stuff\\flutter\\flutter_windows_3.13.5-stable\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\mikag\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\mikag\\Documents\\Universiteit\\3ba\\BP\\24-25\\Research\\Flutter\\stress_measurement_app\\stress_measurement_app\\android\\app\\.cxx\\RelWithDebInfo\\6l4k2q6i\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\mikag\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\mikag\\Documents\\Universiteit\\3ba\\BP\\24-25\\Research\\Flutter\\stress_measurement_app\\stress_measurement_app\\android\\app\\.cxx\\RelWithDebInfo\\6l4k2q6i\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
