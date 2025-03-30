@@ -18,6 +18,9 @@ BLECharacteristic *pCommandCharacteristic = NULL;
 
 const int gsrPin = A2;
 bool measuring = false;
+bool measuringHeart = false;
+bool measuringSpo2 = false;
+bool measuringGSR = false;
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 uint16_t irBuffer[100], redBuffer[100];
@@ -36,7 +39,10 @@ class MyServerCallbacks : public BLEServerCallbacks {
     }
     void onDisconnect(BLEServer* pServer) {
         Serial.println("App disconnected.");
-        measuring = false;  // Stop measuring if app disconnects
+        measuring = false;
+        measuringHeart = false;
+        measuringSpo2 = false;
+        measuringGSR = false;  // Stop measuring if app disconnects
     }
 };
 
@@ -47,8 +53,23 @@ class MyCommandCallbacks : public BLECharacteristicCallbacks {
         if (command == "START") {
             measuring = true;
             Serial.println("Measurement Started!");
-        } else if (command == "STOP") {
+        } else if (command == "START HEART"){
+          measuringHeart = true;
+          Serial.println("Heart measurement Started!");
+        }
+        else if (command == "START SPO2"){
+          measuringSpo2 = true;
+          Serial.println("SPO2 measurement Started!");
+        }
+        else if (command == "START GSR"){
+          measuringGSR = true;
+          Serial.println("GSR measurement Started!");
+        }
+        else if (command == "STOP") {
             measuring = false;
+            measuringHeart = false;
+            measuringSpo2 = false;
+            measuringGSR = false;
             Serial.println("Measurement Stopped!");
         }
     }
@@ -83,6 +104,15 @@ void setup() {
 void loop() {
     if (measuring) {
         readingsHeartRateSPO2Sensor();
+        readingsGSRSensor();
+        sendDataOverBluetooth();
+    } else if (measuringHeart){
+        readingsHeartRateSPO2Sensor();
+        sendDataOverBluetooth();
+    } else if (measuringSpo2){
+        readingsHeartRateSPO2Sensor();
+        sendDataOverBluetooth();
+    } else if (measuringGSR){
         readingsGSRSensor();
         sendDataOverBluetooth();
     }
