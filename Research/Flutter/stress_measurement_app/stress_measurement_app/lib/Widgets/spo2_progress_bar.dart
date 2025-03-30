@@ -10,8 +10,11 @@ class Spo2ProgressBar extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         const Text("SpO2 Level",
-            style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 90),
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 30,
+                fontWeight: FontWeight.bold)),
+        const SizedBox(height: 65),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: Stack(
@@ -30,11 +33,7 @@ class Spo2ProgressBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     gradient: const LinearGradient(
-                      colors: [
-                        Colors.red,
-                        Colors.orange,
-                        Colors.green
-                      ],
+                      colors: [Colors.red, Colors.orange, Colors.green],
                       stops: [0.0, 0.8, 0.9], // Smooth transition
                     ),
                   ),
@@ -48,7 +47,18 @@ class Spo2ProgressBar extends StatelessWidget {
           "${spo2.toStringAsFixed(1)}%",
           style: const TextStyle(color: Colors.black, fontSize: 20),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 40),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          height: 40,
+          width: 160,
+          child: FloatingActionButton(
+              child: const Text("SPO2 data history"), onPressed: () {}),
+        ),
+        const Spacer(),
       ],
     );
   }

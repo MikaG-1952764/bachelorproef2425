@@ -11,6 +11,21 @@ class SensorData extends ChangeNotifier {
     heartRate = newHR;
     spo2 = newSpo2;
     gsr = newGSR;
-    notifyListeners(); // Notify listeners that the data has changed
+    notifyListeners();
+  }
+
+  void setSHeartData(double newHR) {
+    heartRate = newHR;
+    notifyListeners();
+  }
+
+  void setSpo2Data(double newSpo2) {
+    spo2 = newSpo2;
+    notifyListeners();
+  }
+
+  void setGSRData(double newGSR) {
+    gsr = newGSR;
+    notifyListeners();
   }
 }

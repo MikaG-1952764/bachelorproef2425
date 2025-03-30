@@ -20,7 +20,6 @@ class GsrLineChart extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 10),
-        const Spacer(),
         SfRadialGauge(
           axes: <RadialAxis>[
             RadialAxis(
@@ -29,7 +28,7 @@ class GsrLineChart extends StatelessWidget {
               minimum: minValue,
               maximum: maxValue,
               axisLineStyle: AxisLineStyle(
-                thickness: 10, 
+                thickness: 10,
                 color: axisColor, // Configurable axis color
               ),
               pointers: [
@@ -43,7 +42,8 @@ class GsrLineChart extends StatelessWidget {
                 GaugeAnnotation(
                   widget: Text(
                     "$gsr GSR",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   angle: 90,
                   positionFactor: 0.0,
@@ -51,6 +51,17 @@ class GsrLineChart extends StatelessWidget {
               ],
             ),
           ],
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          height: 40,
+          width: 160,
+          child: FloatingActionButton(
+              child: const Text("GSR data history"), onPressed: () {}),
         ),
         const Spacer(),
       ],

@@ -5,14 +5,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import '../Models/sensor_data.dart';
 
-class Bluetooth with ChangeNotifier{
+class Bluetooth with ChangeNotifier {
   fbp.BluetoothDevice? connectedDevice;
   final List<fbp.ScanResult> _scanResults = [];
   final StreamController<List<fbp.ScanResult>> _scanResultsStreamController =
       StreamController<List<fbp.ScanResult>>.broadcast();
 
   bool isMeasuring = false; // Flag to track measurement state
-  
+
   // Expose the stream to listen to scan results
   Stream<List<fbp.ScanResult>> get scanResultsStream =>
       _scanResultsStreamController.stream;
@@ -39,7 +39,8 @@ class Bluetooth with ChangeNotifier{
     // Request permissions before proceeding
     await requestPermissions();
 
-    bool isBluetoothOn = fbp.FlutterBluePlus.adapterState == fbp.BluetoothAdapterState.on;
+    bool isBluetoothOn =
+        fbp.FlutterBluePlus.adapterState == fbp.BluetoothAdapterState.on;
     if (!isBluetoothOn) {
       await fbp.FlutterBluePlus.turnOn();
     }
@@ -47,7 +48,8 @@ class Bluetooth with ChangeNotifier{
     // Start scanning with a higher scan mode for better responsiveness
     await fbp.FlutterBluePlus.startScan(
       timeout: const Duration(seconds: 20),
-      androidScanMode: fbp.AndroidScanMode.lowLatency, // Try using lowLatency mode
+      androidScanMode:
+          fbp.AndroidScanMode.lowLatency, // Try using lowLatency mode
     );
 
     // Log Bluetooth state
@@ -79,22 +81,25 @@ class Bluetooth with ChangeNotifier{
       connectedDevice = device;
       print('Connected to ${device.platformName}');
       // Discover available services & characteristics
-      List<fbp.BluetoothService> services = await connectedDevice!.discoverServices();
+      List<fbp.BluetoothService> services =
+          await connectedDevice!.discoverServices();
       Future.delayed(const Duration(seconds: 2));
       await device.requestMtu(23);
       for (var service in services) {
         for (var characteristic in service.characteristics) {
-          if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) { // Find correct characteristic
+          if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) {
+            // Find correct characteristic
             print("Found characteristic: ${characteristic.uuid}");
             if (characteristic.properties.notify) {
               characteristic.lastValueStream.listen((value) {
-                if(value.isEmpty){
+                if (value.isEmpty) {
                   print("No data received");
                 } else {
                   String receivedData = String.fromCharCodes(value);
                   print("Received BLE Data: $receivedData");
 
-                  RegExp regex = RegExp(r'HR:\s*([\d.]+), SpO2:\s*([\d.]+), GSR:\s*([\d.]+)');
+                  RegExp regex = RegExp(
+                      r'HR:\s*([\d.]+), SpO2:\s*([\d.]+), GSR:\s*([\d.]+)');
                   var match = regex.firstMatch(receivedData);
 
                   if (match != null) {
@@ -102,8 +107,11 @@ class Bluetooth with ChangeNotifier{
                     double spo2 = double.tryParse(match.group(2)!) ?? 0;
                     double gsr = double.tryParse(match.group(3)!) ?? 0;
 
-                    SensorData sensorData = SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
-                    print("Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");}
+                    SensorData sensorData =
+                        SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
+                    print(
+                        "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
+                  }
                 }
               });
             }
@@ -121,15 +129,93 @@ class Bluetooth with ChangeNotifier{
       notifyListeners();
     }
 
-    List<fbp.BluetoothService> services = await connectedDevice!.discoverServices();
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
-        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) { // Command Characteristic
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
           print("Sending START command...");
-          await characteristic.write(utf8.encode("START"), withoutResponse: false);
+          await characteristic.write(utf8.encode("START"),
+              withoutResponse: false);
           isMeasuring = true;
           print("Measurement started");
-          readData(sensorData);
+          readData(sensorData, "all");
+          notifyListeners();
+        }
+      }
+    }
+    print("START command characteristic not found");
+  }
+
+  Future<void> startHeartMeasurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          print("Sending START HEART command...");
+          await characteristic.write(utf8.encode("START HEART"),
+              withoutResponse: false);
+          isMeasuring = true;
+          print("Measurement started");
+          readData(sensorData, "HR");
+          notifyListeners();
+        }
+      }
+    }
+    print("START command characteristic not found");
+  }
+
+  Future<void> startSpo2Measurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          print("Sending START SPO2 command...");
+          await characteristic.write(utf8.encode("START SPO2"),
+              withoutResponse: false);
+          isMeasuring = true;
+          print("Measurement started");
+          readData(sensorData, "SpO2");
+          notifyListeners();
+        }
+      }
+    }
+    print("START command characteristic not found");
+  }
+
+  Future<void> startGSRMeasurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          print("Sending START GSR command...");
+          await characteristic.write(utf8.encode("START GSR"),
+              withoutResponse: false);
+          isMeasuring = true;
+          print("Measurement started");
+          readData(sensorData, "GSR");
           notifyListeners();
         }
       }
@@ -143,12 +229,15 @@ class Bluetooth with ChangeNotifier{
       notifyListeners();
     }
 
-    List<fbp.BluetoothService> services = await connectedDevice!.discoverServices();
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
-        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) { // Command Characteristic
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
           print("Sending STOP command...");
-          await characteristic.write(utf8.encode("STOP"), withoutResponse: false);
+          await characteristic.write(utf8.encode("STOP"),
+              withoutResponse: false);
           isMeasuring = false;
           print("Measurement stopped");
           notifyListeners();
@@ -158,22 +247,24 @@ class Bluetooth with ChangeNotifier{
     print("STOP command characteristic not found");
   }
 
-int receivedDataCount = 0; // Counter to track received data
-final int maxReadings = 1; // Adjust this number based on your needs
+  int receivedDataCount = 0; // Counter to track received data
+  final int maxReadings = 1; // Adjust this number based on your needs
 
-Future<void> readData(SensorData sensorData) async {
-  if (connectedDevice == null || !isMeasuring) {
-    print("No device found or measurement not active");
-    return;
-  }
+  Future<void> readData(SensorData sensorData, String newData) async {
+    if (connectedDevice == null || !isMeasuring) {
+      print("No device found or measurement not active");
+      return;
+    }
 
-  List<fbp.BluetoothService> services = await connectedDevice!.discoverServices();
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
-        if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) { // Data Characteristic
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) {
+          // Data Characteristic
           if (characteristic.properties.notify) {
             await characteristic.setNotifyValue(true);
-            
+
             characteristic.lastValueStream.listen((value) async {
               if (value.isEmpty) {
                 print("No data received");
@@ -187,17 +278,35 @@ Future<void> readData(SensorData sensorData) async {
               List<String> parts = receivedData.split(' ');
               if (parts.length == 3) {
                 double hr = double.tryParse(parts[0].split(':')[1].trim()) ?? 0;
-                double spo2 = double.tryParse(parts[1].split(':')[1].trim()) ?? 0;
-                double gsr = double.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+                double spo2 =
+                    double.tryParse(parts[1].split(':')[1].trim()) ?? 0;
+                double gsr =
+                    double.tryParse(parts[2].split(':')[1].trim()) ?? 0;
 
-                sensorData.setData(hr, spo2, gsr);
-                print("Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
+                // Update SensorData based on the new data type
+                switch (newData) {
+                  case "HR":
+                    sensorData.setSHeartData(hr);
+                    break;
+                  case "SpO2":
+                    sensorData.setSpo2Data(spo2);
+                    break;
+                  case "GSR":
+                    sensorData.setGSRData(gsr);
+                    break;
+                  default:
+                    sensorData.setData(hr, spo2, gsr);
+                    break;
+                }
+
+                print(
+                    "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
               }
               // Increment received data count
               receivedDataCount++;
               if (receivedDataCount >= maxReadings) {
                 value.clear();
-                
+
                 print("Max readings received. Stopping measurement.");
 
                 // Stop notifications before stopping measurement

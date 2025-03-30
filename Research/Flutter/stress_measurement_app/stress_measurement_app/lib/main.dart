@@ -11,7 +11,7 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({super.key});
   final Bluetooth bluetooth = Bluetooth();
-  
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(

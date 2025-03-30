@@ -1,0 +1,2 @@
+D:/Universiteit/3ba/BP/2024-2025/bachelorproef2425/Research/Flutter/stress_measurement_app/stress_measurement_app/android/app/.cxx/Debug/11445u5p/x86_64/CMakeFiles/edit_cache.dir
+D:/Universiteit/3ba/BP/2024-2025/bachelorproef2425/Research/Flutter/stress_measurement_app/stress_measurement_app/android/app/.cxx/Debug/11445u5p/x86_64/CMakeFiles/rebuild_cache.dir

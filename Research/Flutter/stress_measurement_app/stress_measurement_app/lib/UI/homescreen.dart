@@ -28,7 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void showBluetoothScanPage(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => BluetoothScanPage(bluetoothService: widget.bluetooth)),
+      MaterialPageRoute(
+          builder: (context) =>
+              BluetoothScanPage(bluetoothService: widget.bluetooth)),
     );
   }
 
@@ -36,7 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // Navigate to the ConfiguringPage and wait for the result
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ConfiguringPage(configuringValue: "Heart Rate")),
+      MaterialPageRoute(
+          builder: (context) =>
+              const ConfiguringPage(configuringValue: "Heart Rate")),
     );
 
     // If result is not null, update the min and max values
@@ -52,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // Navigate to the ConfiguringPage and wait for the result
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ConfiguringPage(configuringValue: "GSR")),
+      MaterialPageRoute(
+          builder: (context) => const ConfiguringPage(configuringValue: "GSR")),
     );
 
     // If result is not null, update the min and max values
@@ -94,11 +99,153 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? const Text("Measuring...")
                         : const Text("Start measurement"),
                     onPressed: () async {
-                      if (bluetooth.isMeasuring) {
+                      if (bluetooth.connectedDevice == null) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                                  title: const Text("No Device Connected"),
+                                  content: const Text(
+                                      "Please connect to a device to start measurement"),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("OK"),
+                                    ),
+                                  ],
+                                ));
+                      } else if (bluetooth.isMeasuring) {
                         await bluetooth.stopMeasurement();
                       } else {
-                        await bluetooth.startMeasurement(
-                            Provider.of<SensorData>(context, listen: false));
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) => AlertDialog(
+                                  title: bluetooth.connectedDevice != null
+                                      ? const Text(
+                                          "Select parameters to measure")
+                                      : const Text("No Device Connected"),
+                                  content: bluetooth.connectedDevice != null
+                                      ? const Text("")
+                                      : const Text("No Device Connected"),
+                                  actions: [
+                                    Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Spacer(),
+                                            Container(
+                                              width: 100,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: Colors.blue,
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () => {
+                                                  bluetooth.startMeasurement(
+                                                      Provider.of<SensorData>(
+                                                          context,
+                                                          listen: false)),
+                                                  Navigator.pop(context),
+                                                },
+                                                child: const Text(
+                                                  "All",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Container(
+                                              width: 100,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: Colors.blue,
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () => {
+                                                  bluetooth
+                                                      .startHeartMeasurement(
+                                                          Provider.of<
+                                                                  SensorData>(
+                                                              context,
+                                                              listen: false)),
+                                                  Navigator.pop(context),
+                                                },
+                                                child: const Text(
+                                                  "Heart Rate",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Spacer(),
+                                            Container(
+                                              width: 100,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: Colors.blue,
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () => {
+                                                  bluetooth
+                                                      .startSpo2Measurement(
+                                                          Provider.of<
+                                                                  SensorData>(
+                                                              context,
+                                                              listen: false)),
+                                                  Navigator.pop(context),
+                                                },
+                                                child: const Text(
+                                                  "Spo2",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Container(
+                                              width: 100,
+                                              height: 40,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                                color: Colors.blue,
+                                              ),
+                                              child: TextButton(
+                                                onPressed: () => {
+                                                  bluetooth.startGSRMeasurement(
+                                                      Provider.of<SensorData>(
+                                                          context,
+                                                          listen: false)),
+                                                  Navigator.pop(context),
+                                                },
+                                                child: const Text(
+                                                  "GSR",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ));
                       }
                     },
                   );
@@ -123,31 +270,42 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                         ),
                         width: 300,
-                        height: 450,
-                        child:  Column(
+                        height: 480,
+                        child: Column(
                           children: [
                             Row(
                               children: [
-                                const SizedBox(width: 10,),
-                                const Text('Heart Rate', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                const Text('Heart Rate',
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold)),
                                 const Spacer(),
                                 IconButton(
                                   icon: const Icon(Icons.settings),
-                                  onPressed: () => navigateToConfiguringHeartPage(context),
+                                  onPressed: () =>
+                                      navigateToConfiguringHeartPage(context),
                                 ),
                                 const SizedBox(width: 10),
                               ],
                             ),
-                            Expanded(child:  minHeartValue != -1.0 && maxHeartValue != -1.0
-                              ? HeartRateGauge(
-                                  heartRate: sensorData.heartRate,
-                                  minValue: minHeartValue,
-                                  maxValue: maxHeartValue,
-                                )
-                              : HeartRateGauge(heartRate: sensorData.heartRate),)
+                            Expanded(
+                              child:
+                                  minHeartValue != -1.0 && maxHeartValue != -1.0
+                                      ? HeartRateGauge(
+                                          heartRate: sensorData.heartRate,
+                                          minValue: minHeartValue,
+                                          maxValue: maxHeartValue,
+                                        )
+                                      : HeartRateGauge(
+                                          heartRate: sensorData.heartRate),
+                            )
                           ],
                         ),
-                    ),),
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     Container(
                       decoration: BoxDecoration(
@@ -167,24 +325,37 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white,
                       ),
                       width: 300,
-                      height: 420,
+                      height: 490,
                       child: Column(
                         children: [
-                          Row(children: [
-                            const SizedBox(width: 10,),
-                            const Text('GSR', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                            const Spacer(),
-                            IconButton(onPressed: () => navigateToConfiguringGSRPage(context),
-                            icon: const Icon(Icons.settings)),
-                            const SizedBox(width: 4,),
-                          ],),
-                          Expanded(child:  minGSRValue != -1.0 && maxGSRValue != -1.0
-                              ? GsrLineChart(
-                                  gsr: sensorData.gsr,
-                                  minValue: minGSRValue,
-                                  maxValue: maxGSRValue,
-                                )
-                              : GsrLineChart(gsr: sensorData.gsr),),
+                          Row(
+                            children: [
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              const Text('GSR',
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold)),
+                              const Spacer(),
+                              IconButton(
+                                  onPressed: () =>
+                                      navigateToConfiguringGSRPage(context),
+                                  icon: const Icon(Icons.settings)),
+                              const SizedBox(
+                                width: 4,
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: minGSRValue != -1.0 && maxGSRValue != -1.0
+                                ? GsrLineChart(
+                                    gsr: sensorData.gsr,
+                                    minValue: minGSRValue,
+                                    maxValue: maxGSRValue,
+                                  )
+                                : GsrLineChart(gsr: sensorData.gsr),
+                          ),
                         ],
                       ),
                     ),

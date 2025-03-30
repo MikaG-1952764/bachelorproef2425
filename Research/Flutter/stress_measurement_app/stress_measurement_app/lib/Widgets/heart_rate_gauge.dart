@@ -5,6 +5,7 @@ class HeartRateGauge extends StatelessWidget {
   final double heartRate;
   final double minValue;
   final double maxValue;
+  final List<int> thresholdValues;
   final List<Color> rangeColors;
 
   const HeartRateGauge({
@@ -12,7 +13,12 @@ class HeartRateGauge extends StatelessWidget {
     required this.heartRate,
     this.minValue = 50,
     this.maxValue = 150,
-    this.rangeColors = const [Colors.green, Colors.green, Colors.orange, Colors.red], // Default gradient colors
+    this.thresholdValues = const [120, 180, 250],
+    this.rangeColors = const [
+      Colors.green,
+      Colors.orange,
+      Colors.red
+    ], // Default gradient colors
   });
 
   @override
@@ -20,7 +26,6 @@ class HeartRateGauge extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 10),
-        const Spacer(),
         SfRadialGauge(
           axes: <RadialAxis>[
             RadialAxis(
@@ -33,7 +38,7 @@ class HeartRateGauge extends StatelessWidget {
                 thicknessUnit: GaugeSizeUnit.factor,
                 gradient: SweepGradient(
                   colors: rangeColors, // Configurable colors
-                  stops: _generateStops(rangeColors.length), // Dynamically calculated stops
+                  stops: _calculateStops(),
                 ),
               ),
               pointers: [
@@ -47,7 +52,8 @@ class HeartRateGauge extends StatelessWidget {
                 GaugeAnnotation(
                   widget: Text(
                     "$heartRate bpm",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   angle: 90,
                   positionFactor: 0.0,
@@ -56,13 +62,25 @@ class HeartRateGauge extends StatelessWidget {
             ),
           ],
         ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          height: 40,
+          width: 160,
+          child: FloatingActionButton(
+              child: const Text("Heart data history"), onPressed: () {}),
+        ),
         const Spacer(),
       ],
     );
   }
 
   // Helper function to generate stops for the gradient dynamically
-  List<double> _generateStops(int length) {
-    return List.generate(length, (index) => index / (length - 1));
+  List<double> _calculateStops() {
+    return thresholdValues.map((t) {
+      return ((t - minValue) / (maxValue - minValue)).clamp(0.0, 1.0);
+    }).toList();
   }
 }
