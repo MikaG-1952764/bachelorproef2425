@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/UI/data_history_page.dart';
 
 class Spo2ProgressBar extends StatelessWidget {
   final double spo2;
@@ -56,7 +57,15 @@ class Spo2ProgressBar extends StatelessWidget {
           height: 40,
           width: 160,
           child: FloatingActionButton(
-              child: const Text("SPO2 data history"), onPressed: () {}),
+              child: const Text("SPO2 data history"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DataHistoryPage(
+                              pageName: "Spo2",
+                            )));
+              }),
         ),
         const Spacer(),
       ],

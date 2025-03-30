@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HeartRateGauge extends StatelessWidget {
@@ -70,7 +71,15 @@ class HeartRateGauge extends StatelessWidget {
           height: 40,
           width: 160,
           child: FloatingActionButton(
-              child: const Text("Heart data history"), onPressed: () {}),
+              child: const Text("Heart data history"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DataHistoryPage(
+                              pageName: "Heart Rate",
+                            )));
+              }),
         ),
         const Spacer(),
       ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class GsrLineChart extends StatelessWidget {
@@ -61,7 +62,15 @@ class GsrLineChart extends StatelessWidget {
           height: 40,
           width: 160,
           child: FloatingActionButton(
-              child: const Text("GSR data history"), onPressed: () {}),
+              child: const Text("GSR data history"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DataHistoryPage(
+                              pageName: "GSR",
+                            )));
+              }),
         ),
         const Spacer(),
       ],
