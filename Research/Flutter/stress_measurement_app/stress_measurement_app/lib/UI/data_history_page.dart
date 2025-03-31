@@ -9,20 +9,80 @@ class DataHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: Text("$pageName data history"),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 1.0)),
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text("Dummy text"),
-              ),
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Text("Nr.",
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                  ),
+                ),
+                Container(
+                  width: 120,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Text("Date",
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                  ),
+                ),
+                Container(
+                  width: 300,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Text("Measurement",
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                  ),
+                ),
+              ],
             ),
-          )
-        ],
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text("1")),
+                  ),
+                ),
+                Container(
+                  width: 120,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text("20/03/2023")),
+                  ),
+                ),
+                Container(
+                  width: 300,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1.0)),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text("120 beats/min")),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
