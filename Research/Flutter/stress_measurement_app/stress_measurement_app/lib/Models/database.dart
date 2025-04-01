@@ -6,6 +6,9 @@ import 'dart:io';
 
 part 'database.g.dart';
 
+String? userName = null;
+int? userId = null;
+
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().named('Your name')();
@@ -42,6 +45,11 @@ class StressLevel extends Table {
 
 @DriftDatabase(tables: [Users, HeartRate, GSR, SPO2, StressLevel])
 class AppDatabase extends _$AppDatabase {
+  Future<void> setCurrentUser(String username) async {
+    userName = username;
+    userId = await getUserIdFromUsername(username);
+  }
+
   AppDatabase() : super(_openConnection());
 
   @override
@@ -105,5 +113,16 @@ class AppDatabase extends _$AppDatabase {
   // Get heart rate data for a user
   Future<List<SPO2Data>> getSpo2s(int userId) async {
     return (select(spo2)..where((t) => t.userId.equals(userId))).get();
+  }
+
+  Future<int?> getUserIdFromUsername(String username) async {
+    final result =
+        await (select(users)..where((tbl) => tbl.name.equals(username))).get();
+
+    if (result.isNotEmpty) {
+      return result.first.id; // Return the userId of the first matching user
+    } else {
+      return null; // If no user with that username was found
+    }
   }
 }
