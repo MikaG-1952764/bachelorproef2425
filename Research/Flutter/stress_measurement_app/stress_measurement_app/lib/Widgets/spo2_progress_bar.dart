@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
 
 class Spo2ProgressBar extends StatelessWidget {
-  final double spo2;
+  final int spo2;
   const Spo2ProgressBar(this.spo2, {super.key});
 
-  Color getSpo2Color(double spo2) {
+  Color getSpo2Color(int spo2) {
     if (spo2 < 90) {
       return Colors.red; // Low SpO2 level
     } else if (spo2 >= 90 && spo2 <= 95) {

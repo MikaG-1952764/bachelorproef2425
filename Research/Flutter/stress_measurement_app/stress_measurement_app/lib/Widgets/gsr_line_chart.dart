@@ -3,7 +3,7 @@ import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class GsrLineChart extends StatelessWidget {
-  final double gsr;
+  final int gsr;
   final double minValue;
   final double maxValue;
   final Color axisColor;
@@ -34,7 +34,7 @@ class GsrLineChart extends StatelessWidget {
               ),
               pointers: [
                 MarkerPointer(
-                  value: gsr,
+                  value: gsr.toDouble(),
                   color: Colors.black,
                   markerHeight: 20,
                 ),

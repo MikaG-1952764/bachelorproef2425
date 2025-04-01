@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'dart:async';
 import '../Models/sensor_data.dart';
 
@@ -104,9 +105,9 @@ class Bluetooth with ChangeNotifier {
                   var match = regex.firstMatch(receivedData);
 
                   if (match != null) {
-                    double hr = double.tryParse(match.group(1)!) ?? 0;
-                    double spo2 = double.tryParse(match.group(2)!) ?? 0;
-                    double gsr = double.tryParse(match.group(3)!) ?? 0;
+                    int hr = int.tryParse(match.group(1)!) ?? 0;
+                    int spo2 = int.tryParse(match.group(2)!) ?? 0;
+                    int gsr = int.tryParse(match.group(3)!) ?? 0;
 
                     SensorData sensorData =
                         SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
@@ -286,28 +287,33 @@ class Bluetooth with ChangeNotifier {
               // Parse data if it follows "HR: X, SpO2: Y, GSR: Z"
               List<String> parts = receivedData.split(' ');
               if (parts.length == 3) {
-                double hr = double.tryParse(parts[0].split(':')[1].trim()) ?? 0;
-                double spo2 =
-                    double.tryParse(parts[1].split(':')[1].trim()) ?? 0;
-                double gsr =
-                    double.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+                int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
+                int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
+                int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
 
                 // Update SensorData based on the new data type
                 switch (newData) {
                   case "HR":
                     print("in case hr");
                     sensorData.setHeartData(hr);
+                    AppDatabase appDatabase = AppDatabase();
+                    appDatabase.insertHeartRate(
+                        1, hr); // Save heart rate to database
                     newData =
                         "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
                     print("in case spo2");
                     sensorData.setSpo2Data(spo2);
+                    AppDatabase appDatabase = AppDatabase();
+                    appDatabase.insertSpo2(1, spo2);
                     newData = "all"; // Reset to all after SpO2 measurement
                     break;
                   case "GSR":
                     print("in case gsr");
                     sensorData.setGSRData(gsr);
+                    AppDatabase appDatabase = AppDatabase();
+                    appDatabase.insertGSR(1, gsr);
                     newData = "all"; // Reset to all after GSR measurement
                     break;
                   default:

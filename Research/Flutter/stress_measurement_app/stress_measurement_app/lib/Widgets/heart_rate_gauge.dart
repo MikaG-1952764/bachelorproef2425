@@ -3,7 +3,7 @@ import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HeartRateGauge extends StatelessWidget {
-  final double heartRate;
+  final int heartRate;
   final double minValue;
   final double maxValue;
   final List<int> thresholdValues;
@@ -44,7 +44,7 @@ class HeartRateGauge extends StatelessWidget {
               ),
               pointers: [
                 MarkerPointer(
-                  value: heartRate,
+                  value: heartRate.toDouble(),
                   color: Colors.black,
                   markerHeight: 20,
                 ),
