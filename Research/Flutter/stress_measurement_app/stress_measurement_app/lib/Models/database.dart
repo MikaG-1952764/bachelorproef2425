@@ -70,10 +70,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Insert heart rate data
-  Future<int> insertHeartRate(int userId, int measuredHeartRate) async {
+  Future<int> insertHeartRate(int measuredHeartRate) async {
     return into(heartRate).insert(
       HeartRateCompanion(
-        userId: Value(userId),
+        userId: Value(userId!),
         heartRate: Value(measuredHeartRate),
         createdAt: Value(DateTime.now()),
       ),
@@ -85,10 +85,10 @@ class AppDatabase extends _$AppDatabase {
     return (select(heartRate)..where((t) => t.userId.equals(userId))).get();
   }
 
-  Future<int> insertGSR(int userId, int measuredGSR) async {
+  Future<int> insertGSR(int measuredGSR) async {
     return into(gsr).insert(
       GSRCompanion(
-        userId: Value(userId),
+        userId: Value(userId!),
         gsr: Value(measuredGSR),
         createdAt: Value(DateTime.now()),
       ),
@@ -100,10 +100,10 @@ class AppDatabase extends _$AppDatabase {
     return (select(gsr)..where((t) => t.userId.equals(userId))).get();
   }
 
-  Future<int> insertSpo2(int userId, int measuredSpo2) async {
+  Future<int> insertSpo2(int measuredSpo2) async {
     return into(spo2).insert(
       SPO2Companion(
-        userId: Value(userId),
+        userId: Value(userId!),
         spo2: Value(measuredSpo2),
         createdAt: Value(DateTime.now()),
       ),
