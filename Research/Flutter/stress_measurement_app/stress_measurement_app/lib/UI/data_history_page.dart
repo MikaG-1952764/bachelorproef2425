@@ -27,7 +27,7 @@ class DataHistoryPage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 120,
+                  width: 100,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 1.0)),
                   child: const Padding(
@@ -38,7 +38,7 @@ class DataHistoryPage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 300,
+                  width: 200,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 1.0)),
                   child: const Padding(
@@ -62,7 +62,7 @@ class DataHistoryPage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 120,
+                  width: 100,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 1.0)),
                   child: const Padding(
@@ -71,7 +71,7 @@ class DataHistoryPage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 300,
+                  width: 200,
                   decoration: BoxDecoration(
                       border: Border.all(color: Colors.black, width: 1.0)),
                   child: const Padding(

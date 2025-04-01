@@ -5,6 +5,16 @@ class Spo2ProgressBar extends StatelessWidget {
   final double spo2;
   const Spo2ProgressBar(this.spo2, {super.key});
 
+  Color getSpo2Color(double spo2) {
+    if (spo2 < 90) {
+      return Colors.red; // Low SpO2 level
+    } else if (spo2 >= 90 && spo2 <= 95) {
+      return Colors.orange; // Normal SpO2 level
+    } else {
+      return Colors.green; // Invalid SpO2 level
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -33,10 +43,7 @@ class Spo2ProgressBar extends StatelessWidget {
                   width: constraints.maxWidth * (spo2 / 100),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    gradient: const LinearGradient(
-                      colors: [Colors.red, Colors.orange, Colors.green],
-                      stops: [0.0, 0.8, 0.9], // Smooth transition
-                    ),
+                    color: getSpo2Color(spo2),
                   ),
                 ),
               ),

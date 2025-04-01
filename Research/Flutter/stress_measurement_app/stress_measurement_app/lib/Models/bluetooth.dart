@@ -12,6 +12,7 @@ class Bluetooth with ChangeNotifier {
       StreamController<List<fbp.ScanResult>>.broadcast();
 
   bool isMeasuring = false; // Flag to track measurement state
+  String newData = "all"; // Variable to track the type of data being read
 
   // Expose the stream to listen to scan results
   Stream<List<fbp.ScanResult>> get scanResultsStream =>
@@ -140,7 +141,7 @@ class Bluetooth with ChangeNotifier {
               withoutResponse: false);
           isMeasuring = true;
           print("Measurement started");
-          readData(sensorData, "all");
+          readData(sensorData);
           notifyListeners();
         }
       }
@@ -164,8 +165,11 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START HEART"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "HR"; // Set the newData variable to "HR"
           print("Measurement started");
-          readData(sensorData, "HR");
+          readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -189,8 +193,12 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START SPO2"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "SpO2"; // Set the newData variable to "SpO2"
           print("Measurement started");
-          readData(sensorData, "SpO2");
+          print("In spo2 meaurement");
+          readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -214,8 +222,9 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START GSR"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "GSR"; // Set the newData variable to "GSR"
           print("Measurement started");
-          readData(sensorData, "GSR");
+          readData(sensorData);
           notifyListeners();
         }
       }
@@ -250,7 +259,7 @@ class Bluetooth with ChangeNotifier {
   int receivedDataCount = 0; // Counter to track received data
   final int maxReadings = 1; // Adjust this number based on your needs
 
-  Future<void> readData(SensorData sensorData, String newData) async {
+  Future<void> readData(SensorData sensorData) async {
     if (connectedDevice == null || !isMeasuring) {
       print("No device found or measurement not active");
       return;
@@ -286,15 +295,23 @@ class Bluetooth with ChangeNotifier {
                 // Update SensorData based on the new data type
                 switch (newData) {
                   case "HR":
-                    sensorData.setSHeartData(hr);
+                    print("in case hr");
+                    sensorData.setHeartData(hr);
+                    newData =
+                        "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
+                    print("in case spo2");
                     sensorData.setSpo2Data(spo2);
+                    newData = "all"; // Reset to all after SpO2 measurement
                     break;
                   case "GSR":
+                    print("in case gsr");
                     sensorData.setGSRData(gsr);
+                    newData = "all"; // Reset to all after GSR measurement
                     break;
                   default:
+                    print("in case all");
                     sensorData.setData(hr, spo2, gsr);
                     break;
                 }
