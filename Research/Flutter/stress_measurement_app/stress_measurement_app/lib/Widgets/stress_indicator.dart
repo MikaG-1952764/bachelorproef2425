@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class StressIndicator extends StatelessWidget {
-  final double gsr;
+  final int gsr;
   const StressIndicator(this.gsr, {super.key});
 
   String get stressLevel {
@@ -20,8 +20,11 @@ class StressIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: stressColor, borderRadius: BorderRadius.circular(10)),
-      child: Center(child: Text(stressLevel, style: const TextStyle(color: Colors.white, fontSize: 30))),
+      decoration: BoxDecoration(
+          color: stressColor, borderRadius: BorderRadius.circular(10)),
+      child: Center(
+          child: Text(stressLevel,
+              style: const TextStyle(color: Colors.white, fontSize: 30))),
     );
   }
 }

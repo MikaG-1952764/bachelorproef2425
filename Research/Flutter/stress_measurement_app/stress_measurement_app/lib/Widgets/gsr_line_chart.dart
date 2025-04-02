@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Models/bluetooth.dart';
+import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class GsrLineChart extends StatelessWidget {
-  final double gsr;
+  final int gsr;
   final double minValue;
   final double maxValue;
   final Color axisColor;
+  final Bluetooth bluetooth;
 
   const GsrLineChart({
     super.key,
     required this.gsr,
     this.minValue = 100,
     this.maxValue = 1000,
-    this.axisColor = Colors.blue, // Default axis color
+    this.axisColor = Colors.blue,
+    required this.bluetooth, // Default axis color
   });
 
   @override
@@ -33,7 +37,7 @@ class GsrLineChart extends StatelessWidget {
               ),
               pointers: [
                 MarkerPointer(
-                  value: gsr,
+                  value: gsr.toDouble(),
                   color: Colors.black,
                   markerHeight: 20,
                 ),
@@ -61,7 +65,16 @@ class GsrLineChart extends StatelessWidget {
           height: 40,
           width: 160,
           child: FloatingActionButton(
-              child: const Text("GSR data history"), onPressed: () {}),
+              child: const Text("GSR data history"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DataHistoryPage(
+                              pageName: "GSR",
+                              bluetooth: bluetooth,
+                            )));
+              }),
         ),
         const Spacer(),
       ],

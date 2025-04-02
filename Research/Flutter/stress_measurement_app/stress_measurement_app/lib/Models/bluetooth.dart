@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'dart:async';
 import '../Models/sensor_data.dart';
 
@@ -10,8 +11,18 @@ class Bluetooth with ChangeNotifier {
   final List<fbp.ScanResult> _scanResults = [];
   final StreamController<List<fbp.ScanResult>> _scanResultsStreamController =
       StreamController<List<fbp.ScanResult>>.broadcast();
+  late final AppDatabase appDatabase;
+
+  void setDatabase(AppDatabase database) {
+    appDatabase = database;
+  }
+
+  AppDatabase getDatabase() {
+    return appDatabase;
+  }
 
   bool isMeasuring = false; // Flag to track measurement state
+  String newData = "all"; // Variable to track the type of data being read
 
   // Expose the stream to listen to scan results
   Stream<List<fbp.ScanResult>> get scanResultsStream =>
@@ -103,9 +114,9 @@ class Bluetooth with ChangeNotifier {
                   var match = regex.firstMatch(receivedData);
 
                   if (match != null) {
-                    double hr = double.tryParse(match.group(1)!) ?? 0;
-                    double spo2 = double.tryParse(match.group(2)!) ?? 0;
-                    double gsr = double.tryParse(match.group(3)!) ?? 0;
+                    int hr = int.tryParse(match.group(1)!) ?? 0;
+                    int spo2 = int.tryParse(match.group(2)!) ?? 0;
+                    int gsr = int.tryParse(match.group(3)!) ?? 0;
 
                     SensorData sensorData =
                         SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
@@ -140,7 +151,7 @@ class Bluetooth with ChangeNotifier {
               withoutResponse: false);
           isMeasuring = true;
           print("Measurement started");
-          readData(sensorData, "all");
+          readData(sensorData);
           notifyListeners();
         }
       }
@@ -164,8 +175,11 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START HEART"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "HR"; // Set the newData variable to "HR"
           print("Measurement started");
-          readData(sensorData, "HR");
+          readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -189,8 +203,12 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START SPO2"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "SpO2"; // Set the newData variable to "SpO2"
           print("Measurement started");
-          readData(sensorData, "SpO2");
+          print("In spo2 meaurement");
+          readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -214,8 +232,9 @@ class Bluetooth with ChangeNotifier {
           await characteristic.write(utf8.encode("START GSR"),
               withoutResponse: false);
           isMeasuring = true;
+          newData = "GSR"; // Set the newData variable to "GSR"
           print("Measurement started");
-          readData(sensorData, "GSR");
+          readData(sensorData);
           notifyListeners();
         }
       }
@@ -250,7 +269,7 @@ class Bluetooth with ChangeNotifier {
   int receivedDataCount = 0; // Counter to track received data
   final int maxReadings = 1; // Adjust this number based on your needs
 
-  Future<void> readData(SensorData sensorData, String newData) async {
+  Future<void> readData(SensorData sensorData) async {
     if (connectedDevice == null || !isMeasuring) {
       print("No device found or measurement not active");
       return;
@@ -277,25 +296,38 @@ class Bluetooth with ChangeNotifier {
               // Parse data if it follows "HR: X, SpO2: Y, GSR: Z"
               List<String> parts = receivedData.split(' ');
               if (parts.length == 3) {
-                double hr = double.tryParse(parts[0].split(':')[1].trim()) ?? 0;
-                double spo2 =
-                    double.tryParse(parts[1].split(':')[1].trim()) ?? 0;
-                double gsr =
-                    double.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+                int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
+                int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
+                int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
 
                 // Update SensorData based on the new data type
                 switch (newData) {
                   case "HR":
-                    sensorData.setSHeartData(hr);
+                    print("in case hr");
+                    sensorData.setHeartData(hr);
+                    appDatabase
+                        .insertHeartRate(hr); // Save heart rate to database
+                    newData =
+                        "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
+                    print("in case spo2");
                     sensorData.setSpo2Data(spo2);
+                    appDatabase.insertSpo2(spo2);
+                    newData = "all"; // Reset to all after SpO2 measurement
                     break;
                   case "GSR":
+                    print("in case gsr");
                     sensorData.setGSRData(gsr);
+                    appDatabase.insertGSR(gsr);
+                    newData = "all"; // Reset to all after GSR measurement
                     break;
                   default:
+                    print("in case all");
                     sensorData.setData(hr, spo2, gsr);
+                    appDatabase.insertHeartRate(hr);
+                    appDatabase.insertSpo2(spo2);
+                    appDatabase.insertGSR(gsr);
                     break;
                 }
 

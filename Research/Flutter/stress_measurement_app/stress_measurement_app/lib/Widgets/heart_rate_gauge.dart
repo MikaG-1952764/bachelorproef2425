@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Models/bluetooth.dart';
+import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HeartRateGauge extends StatelessWidget {
-  final double heartRate;
+  final int heartRate;
   final double minValue;
   final double maxValue;
   final List<int> thresholdValues;
   final List<Color> rangeColors;
+  final Bluetooth bluetooth;
 
   const HeartRateGauge({
     super.key,
@@ -14,11 +17,8 @@ class HeartRateGauge extends StatelessWidget {
     this.minValue = 50,
     this.maxValue = 150,
     this.thresholdValues = const [120, 180, 250],
-    this.rangeColors = const [
-      Colors.green,
-      Colors.orange,
-      Colors.red
-    ], // Default gradient colors
+    this.rangeColors = const [Colors.green, Colors.orange, Colors.red],
+    required this.bluetooth, // Default gradient colors
   });
 
   @override
@@ -43,7 +43,7 @@ class HeartRateGauge extends StatelessWidget {
               ),
               pointers: [
                 MarkerPointer(
-                  value: heartRate,
+                  value: heartRate.toDouble(),
                   color: Colors.black,
                   markerHeight: 20,
                 ),
@@ -70,7 +70,16 @@ class HeartRateGauge extends StatelessWidget {
           height: 40,
           width: 160,
           child: FloatingActionButton(
-              child: const Text("Heart data history"), onPressed: () {}),
+              child: const Text("Heart data history"),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DataHistoryPage(
+                              pageName: "Heart Rate",
+                              bluetooth: bluetooth,
+                            )));
+              }),
         ),
         const Spacer(),
       ],

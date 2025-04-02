@@ -42,7 +42,7 @@ class MyServerCallbacks : public BLEServerCallbacks {
         measuring = false;
         measuringHeart = false;
         measuringSpo2 = false;
-        measuringGSR = false;  // Stop measuring if app disconnects
+        measuringGSR = false;// Stop measuring if app disconnects
     }
 };
 
@@ -138,6 +138,7 @@ void setupHeartRateSPO2Sensor() {
 // Heart Rate & SpO2 Readings
 void readingsHeartRateSPO2Sensor() {
     bufferLength = 100;
+    Serial.println("Heart & spo2 measuring ...");
     for (byte i = 0; i < bufferLength; i++) {
         while (!particleSensor.available()) particleSensor.check();
         redBuffer[i] = particleSensor.getRed();
@@ -150,6 +151,7 @@ void readingsHeartRateSPO2Sensor() {
 // GSR Sensor Readings
 void readingsGSRSensor() {
     long sum = 0;
+    Serial.println("GSR measuring ...");
     for (int i = 0; i < 10; i++) {
         sum += analogRead(gsrPin);
         delay(5);

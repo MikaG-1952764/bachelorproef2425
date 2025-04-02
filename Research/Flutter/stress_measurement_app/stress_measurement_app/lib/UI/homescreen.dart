@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Models/sensor_data.dart';
 import 'package:stress_measurement_app/UI/configering_page.dart';
 import '../Widgets/heart_rate_gauge.dart';
@@ -71,12 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    AppDatabase database = widget.bluetooth.getDatabase();
+    String currentUser = database.getCurrentUser();
     return ChangeNotifierProvider.value(
       value: widget.bluetooth,
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 148, 204, 250),
         appBar: AppBar(
-          title: const Text("Stress Monitor"),
+          title: Text("Stress Monitoring of $currentUser"),
           centerTitle: true,
           actions: [
             IconButton(
@@ -256,6 +259,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Consumer<SensorData>(builder: (context, sensorData, _) {
                 return Column(
                   children: [
+                    SizedBox(
+                      width: 300,
+                      height: 50,
+                      child: FloatingActionButton(
+                          child: const Text("Print data amount (debug)"),
+                          onPressed: () async {
+                            print(
+                                "Heart rate database readings: ${await widget.bluetooth.getDatabase().getHeartRateCount()}");
+                            print(
+                                "GSR database readings: ${await widget.bluetooth.getDatabase().getGSRCount()}");
+                            print(
+                                "Spo2 database readings: ${await widget.bluetooth.getDatabase().getSpo2Count()}");
+                          }),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Center(
                         child: SizedBox(
                             width: 300,
@@ -298,9 +318,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           heartRate: sensorData.heartRate,
                                           minValue: minHeartValue,
                                           maxValue: maxHeartValue,
+                                          bluetooth: widget.bluetooth,
                                         )
                                       : HeartRateGauge(
-                                          heartRate: sensorData.heartRate),
+                                          heartRate: sensorData.heartRate,
+                                          bluetooth: widget.bluetooth,
+                                        ),
                             )
                           ],
                         ),
@@ -315,7 +338,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       width: 300,
                       height: 300,
-                      child: Spo2ProgressBar(sensorData.spo2),
+                      child: Spo2ProgressBar(
+                        sensorData.spo2,
+                        bluetooth: widget.bluetooth,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Container(
@@ -353,8 +379,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     gsr: sensorData.gsr,
                                     minValue: minGSRValue,
                                     maxValue: maxGSRValue,
+                                    bluetooth: widget.bluetooth,
                                   )
-                                : GsrLineChart(gsr: sensorData.gsr),
+                                : GsrLineChart(
+                                    gsr: sensorData.gsr,
+                                    bluetooth: widget.bluetooth,
+                                  ),
                           ),
                         ],
                       ),
