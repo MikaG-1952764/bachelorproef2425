@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Models/sensor_data.dart';
 import 'package:stress_measurement_app/UI/configering_page.dart';
+import 'package:stress_measurement_app/UI/user_selection.dart';
 import '../Widgets/heart_rate_gauge.dart';
 import '../Widgets/spo2_progress_bar.dart';
 import '../Widgets/gsr_line_chart.dart';
@@ -81,6 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: Text("Stress Monitoring of $currentUser"),
           centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back), // Standard back arrow
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserSelection(
+                          bluetooth: widget.bluetooth,
+                        )), // Replace with your target page
+              );
+            },
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.bluetooth),

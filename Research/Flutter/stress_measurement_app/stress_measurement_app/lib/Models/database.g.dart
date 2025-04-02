@@ -22,6 +22,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'Your name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _maxHeartRateMeta =
+      const VerificationMeta('maxHeartRate');
+  @override
+  late final GeneratedColumn<int> maxHeartRate = GeneratedColumn<int>(
+      'max_heart_rate', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -29,7 +35,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       'created_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, name, createdAt];
+  List<GeneratedColumn> get $columns => [id, name, maxHeartRate, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -49,6 +55,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('max_heart_rate')) {
+      context.handle(
+          _maxHeartRateMeta,
+          maxHeartRate.isAcceptableOrUnknown(
+              data['max_heart_rate']!, _maxHeartRateMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -66,6 +78,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}Your name'])!,
+      maxHeartRate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}max_heart_rate']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
     );
@@ -80,13 +94,21 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 class User extends DataClass implements Insertable<User> {
   final int id;
   final String name;
+  final int? maxHeartRate;
   final DateTime? createdAt;
-  const User({required this.id, required this.name, this.createdAt});
+  const User(
+      {required this.id,
+      required this.name,
+      this.maxHeartRate,
+      this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['Your name'] = Variable<String>(name);
+    if (!nullToAbsent || maxHeartRate != null) {
+      map['max_heart_rate'] = Variable<int>(maxHeartRate);
+    }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
@@ -97,6 +119,9 @@ class User extends DataClass implements Insertable<User> {
     return UsersCompanion(
       id: Value(id),
       name: Value(name),
+      maxHeartRate: maxHeartRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(maxHeartRate),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -109,6 +134,7 @@ class User extends DataClass implements Insertable<User> {
     return User(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      maxHeartRate: serializer.fromJson<int?>(json['maxHeartRate']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
     );
   }
@@ -118,6 +144,7 @@ class User extends DataClass implements Insertable<User> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'maxHeartRate': serializer.toJson<int?>(maxHeartRate),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
     };
   }
@@ -125,16 +152,22 @@ class User extends DataClass implements Insertable<User> {
   User copyWith(
           {int? id,
           String? name,
+          Value<int?> maxHeartRate = const Value.absent(),
           Value<DateTime?> createdAt = const Value.absent()}) =>
       User(
         id: id ?? this.id,
         name: name ?? this.name,
+        maxHeartRate:
+            maxHeartRate.present ? maxHeartRate.value : this.maxHeartRate,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
   User copyWithCompanion(UsersCompanion data) {
     return User(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      maxHeartRate: data.maxHeartRate.present
+          ? data.maxHeartRate.value
+          : this.maxHeartRate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -144,53 +177,64 @@ class User extends DataClass implements Insertable<User> {
     return (StringBuffer('User(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('maxHeartRate: $maxHeartRate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, createdAt);
+  int get hashCode => Object.hash(id, name, maxHeartRate, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is User &&
           other.id == this.id &&
           other.name == this.name &&
+          other.maxHeartRate == this.maxHeartRate &&
           other.createdAt == this.createdAt);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> id;
   final Value<String> name;
+  final Value<int?> maxHeartRate;
   final Value<DateTime?> createdAt;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.maxHeartRate = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    this.maxHeartRate = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name);
   static Insertable<User> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<int>? maxHeartRate,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'Your name': name,
+      if (maxHeartRate != null) 'max_heart_rate': maxHeartRate,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
 
   UsersCompanion copyWith(
-      {Value<int>? id, Value<String>? name, Value<DateTime?>? createdAt}) {
+      {Value<int>? id,
+      Value<String>? name,
+      Value<int?>? maxHeartRate,
+      Value<DateTime?>? createdAt}) {
     return UsersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      maxHeartRate: maxHeartRate ?? this.maxHeartRate,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -204,6 +248,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (name.present) {
       map['Your name'] = Variable<String>(name.value);
     }
+    if (maxHeartRate.present) {
+      map['max_heart_rate'] = Variable<int>(maxHeartRate.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -215,6 +262,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     return (StringBuffer('UsersCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('maxHeartRate: $maxHeartRate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1295,11 +1343,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
   required String name,
+  Value<int?> maxHeartRate,
   Value<DateTime?> createdAt,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int> id,
   Value<String> name,
+  Value<int?> maxHeartRate,
   Value<DateTime?> createdAt,
 });
 
@@ -1377,6 +1427,9 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get maxHeartRate => $composableBuilder(
+      column: $table.maxHeartRate, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -1481,6 +1534,10 @@ class $$UsersTableOrderingComposer
   ColumnOrderings<String> get name => $composableBuilder(
       column: $table.name, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get maxHeartRate => $composableBuilder(
+      column: $table.maxHeartRate,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -1499,6 +1556,9 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get maxHeartRate => $composableBuilder(
+      column: $table.maxHeartRate, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1617,21 +1677,25 @@ class $$UsersTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> name = const Value.absent(),
+            Value<int?> maxHeartRate = const Value.absent(),
             Value<DateTime?> createdAt = const Value.absent(),
           }) =>
               UsersCompanion(
             id: id,
             name: name,
+            maxHeartRate: maxHeartRate,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String name,
+            Value<int?> maxHeartRate = const Value.absent(),
             Value<DateTime?> createdAt = const Value.absent(),
           }) =>
               UsersCompanion.insert(
             id: id,
             name: name,
+            maxHeartRate: maxHeartRate,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

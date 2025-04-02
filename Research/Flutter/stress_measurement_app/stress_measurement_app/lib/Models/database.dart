@@ -12,6 +12,7 @@ int? userId = null;
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().named('Your name')();
+  IntColumn get maxHeartRate => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
@@ -85,8 +86,18 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Insert user
-  Future<int> insertUser(String name) async {
-    return into(users).insert(UsersCompanion(name: Value(name)));
+  Future<int> insertUser(String name, int maxHeartRate) async {
+    return into(users).insert(
+        UsersCompanion(name: Value(name), maxHeartRate: Value(maxHeartRate)));
+  }
+
+  Future<int?> getCurrentUserMaxHeartRate() async {
+    if (userId == null) return null;
+
+    final result = await (select(users)..where((u) => u.id.equals(userId!)))
+        .getSingleOrNull();
+
+    return result?.maxHeartRate;
   }
 
   // Insert heart rate data
