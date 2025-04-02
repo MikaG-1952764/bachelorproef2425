@@ -9,6 +9,19 @@ class DataHistoryPage extends StatelessWidget {
   final Bluetooth bluetooth;
   @override
   Widget build(BuildContext context) {
+    Future<List<Map<String, dynamic>>> fetchData() {
+      switch (pageName) {
+        case "Heart Rate":
+          return bluetooth.getDatabase().getLatestHeartRateReadings(10);
+        case "GSR":
+          return bluetooth.getDatabase().getLatestGSRReadings(10);
+        case "Spo2":
+          return bluetooth.getDatabase().getLatestSpo2Readings(10);
+        default:
+          return Future.value([]);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("$pageName data history"),
@@ -55,9 +68,7 @@ class DataHistoryPage extends StatelessWidget {
               ],
             ),
             FutureBuilder<List<Map<String, dynamic>>>(
-              future: bluetooth
-                  .getDatabase()
-                  .getLatestReadings(10), // Fetch latest 10 readings
+              future: fetchData(), // Fetch latest 10 readings
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -75,7 +86,7 @@ class DataHistoryPage extends StatelessWidget {
                     return DataRowWidget(
                       number: index.toString(),
                       date: reading['date'],
-                      measurement: "${reading['heartRate']} bpm",
+                      measurement: _formatMeasurement(reading),
                     );
                   }).toList(),
                 );
@@ -85,5 +96,18 @@ class DataHistoryPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatMeasurement(Map<String, dynamic> reading) {
+    switch (pageName) {
+      case "Heart Rate":
+        return "${reading['heartRate']} bpm";
+      case "GSR":
+        return "${reading['gsr']} µS"; // Example unit for GSR
+      case "Spo2":
+        return "${reading['spo2']} ms"; // Example unit for spo2
+      default:
+        return "Unknown";
+    }
   }
 }

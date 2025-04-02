@@ -124,7 +124,8 @@ class AppDatabase extends _$AppDatabase {
     return (select(heartRate)..where((t) => t.userId.equals(userId))).get();
   }
 
-  Future<List<Map<String, dynamic>>> getLatestReadings(int limit) async {
+  Future<List<Map<String, dynamic>>> getLatestHeartRateReadings(
+      int limit) async {
     if (userId == null) {
       return []; // No user selected, return an empty list
     }
@@ -156,6 +157,28 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getLatestGSRReadings(int limit) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(gsr)
+      ..where((t) => t.userId.equals(userId!))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+      ..limit(limit));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'gsr': row.gsr,
+      };
+    }).get();
+
+    return results;
+  }
+
   Future<int> getGSRCount() async {
     final countExpression = gsr.id.count();
     final query = selectOnly(gsr)..addColumns([countExpression]);
@@ -177,6 +200,28 @@ class AppDatabase extends _$AppDatabase {
         createdAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestSpo2Readings(int limit) async {
+    if (userId == null) {
+      print("No user selected, returning empty list.");
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(spo2)
+      ..where((t) => t.userId.equals(userId!))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+      ..limit(limit));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'spo2': row.spo2,
+      };
+    }).get();
+    return results;
   }
 
   Future<int> getSpo2Count() async {
