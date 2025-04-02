@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Models/bluetooth.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
 
 class Spo2ProgressBar extends StatelessWidget {
   final int spo2;
-  const Spo2ProgressBar(this.spo2, {super.key});
+  const Spo2ProgressBar(this.spo2, {super.key, required this.bluetooth});
+  final Bluetooth bluetooth;
 
   Color getSpo2Color(int spo2) {
     if (spo2 < 90) {
@@ -69,8 +71,9 @@ class Spo2ProgressBar extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const DataHistoryPage(
+                        builder: (context) => DataHistoryPage(
                               pageName: "Spo2",
+                              bluetooth: bluetooth,
                             )));
               }),
         ),

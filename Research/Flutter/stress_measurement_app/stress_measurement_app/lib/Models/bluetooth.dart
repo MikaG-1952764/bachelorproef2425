@@ -11,6 +11,15 @@ class Bluetooth with ChangeNotifier {
   final List<fbp.ScanResult> _scanResults = [];
   final StreamController<List<fbp.ScanResult>> _scanResultsStreamController =
       StreamController<List<fbp.ScanResult>>.broadcast();
+  late final AppDatabase appDatabase;
+
+  void setDatabase(AppDatabase database) {
+    appDatabase = database;
+  }
+
+  AppDatabase getDatabase() {
+    return appDatabase;
+  }
 
   bool isMeasuring = false; // Flag to track measurement state
   String newData = "all"; // Variable to track the type of data being read
@@ -296,7 +305,6 @@ class Bluetooth with ChangeNotifier {
                   case "HR":
                     print("in case hr");
                     sensorData.setHeartData(hr);
-                    AppDatabase appDatabase = AppDatabase();
                     appDatabase
                         .insertHeartRate(hr); // Save heart rate to database
                     newData =
@@ -305,20 +313,21 @@ class Bluetooth with ChangeNotifier {
                   case "SpO2":
                     print("in case spo2");
                     sensorData.setSpo2Data(spo2);
-                    AppDatabase appDatabase = AppDatabase();
                     appDatabase.insertSpo2(spo2);
                     newData = "all"; // Reset to all after SpO2 measurement
                     break;
                   case "GSR":
                     print("in case gsr");
                     sensorData.setGSRData(gsr);
-                    AppDatabase appDatabase = AppDatabase();
                     appDatabase.insertGSR(gsr);
                     newData = "all"; // Reset to all after GSR measurement
                     break;
                   default:
                     print("in case all");
                     sensorData.setData(hr, spo2, gsr);
+                    appDatabase.insertHeartRate(hr);
+                    appDatabase.insertSpo2(spo2);
+                    appDatabase.insertGSR(gsr);
                     break;
                 }
 

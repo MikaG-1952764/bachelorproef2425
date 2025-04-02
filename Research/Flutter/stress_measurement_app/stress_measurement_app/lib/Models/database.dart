@@ -64,6 +64,26 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  String getCurrentUser() {
+    return userName ?? "No user selected";
+  }
+
+  Future<void> deleteAllData() async {
+    await delete(users).go();
+    await delete(heartRate).go();
+    await delete(gsr).go();
+    await delete(spo2).go();
+    await delete(stressLevel).go();
+  }
+
+  Future<int> getCurrentAmount() async {
+    final countExpression = users.id.count();
+    final query = selectOnly(users)..addColumns([countExpression]);
+    final result =
+        await query.map((row) => row.read(countExpression) ?? 0).getSingle();
+    return result;
+  }
+
   // Insert user
   Future<int> insertUser(String name) async {
     return into(users).insert(UsersCompanion(name: Value(name)));
@@ -80,9 +100,50 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<int> getHeartRateCount() async {
+    final countExpression = heartRate.id.count();
+    final query = selectOnly(heartRate)..addColumns([countExpression]);
+    final result =
+        await query.map((row) => row.read(countExpression) ?? 0).getSingle();
+    return result;
+  }
+
+  Future<List<String>> getAllUserNames() async {
+    final query = select(users).map((user) => user.name);
+    return query.get();
+  }
+
+  Future<String?> getUser(String userName) async {
+    final result = await (select(users)..where((t) => t.name.equals(userName)))
+        .getSingleOrNull();
+    return result?.name;
+  }
+
   // Get heart rate data for a user
   Future<List<HeartRateData>> getUserHeartRates(int userId) async {
     return (select(heartRate)..where((t) => t.userId.equals(userId))).get();
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestReadings(int limit) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(heartRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+      ..limit(limit));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'heartRate': row.heartRate,
+      };
+    }).get();
+
+    return results;
   }
 
   Future<int> insertGSR(int measuredGSR) async {
@@ -93,6 +154,14 @@ class AppDatabase extends _$AppDatabase {
         createdAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<int> getGSRCount() async {
+    final countExpression = gsr.id.count();
+    final query = selectOnly(gsr)..addColumns([countExpression]);
+    final result =
+        await query.map((row) => row.read(countExpression) ?? 0).getSingle();
+    return result;
   }
 
   // Get heart rate data for a user
@@ -108,6 +177,14 @@ class AppDatabase extends _$AppDatabase {
         createdAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<int> getSpo2Count() async {
+    final countExpression = spo2.id.count();
+    final query = selectOnly(spo2)..addColumns([countExpression]);
+    final result =
+        await query.map((row) => row.read(countExpression) ?? 0).getSingle();
+    return result;
   }
 
   // Get heart rate data for a user

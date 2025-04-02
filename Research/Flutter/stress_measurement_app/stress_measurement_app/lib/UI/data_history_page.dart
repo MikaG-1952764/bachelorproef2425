@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Models/bluetooth.dart';
+import 'package:stress_measurement_app/Widgets/data_row.dart';
 
 class DataHistoryPage extends StatelessWidget {
-  const DataHistoryPage({super.key, required this.pageName});
+  const DataHistoryPage(
+      {super.key, required this.pageName, required this.bluetooth});
   final String pageName;
+  final Bluetooth bluetooth;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,36 +54,32 @@ class DataHistoryPage extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: Text("1")),
-                  ),
-                ),
-                Container(
-                  width: 100,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: Text("20/03/2023")),
-                  ),
-                ),
-                Container(
-                  width: 200,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: Text("120 beats/min")),
-                  ),
-                ),
-              ],
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: bluetooth
+                  .getDatabase()
+                  .getLatestReadings(10), // Fetch latest 10 readings
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text("Error: ${snapshot.error}");
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text("No data available.");
+                }
+
+                final readings = snapshot.data!;
+                return Column(
+                  children: readings.asMap().entries.map((entry) {
+                    final index = entry.key + 1;
+                    final reading = entry.value;
+                    return DataRowWidget(
+                      number: index.toString(),
+                      date: reading['date'],
+                      measurement: "${reading['heartRate']} bpm",
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),
