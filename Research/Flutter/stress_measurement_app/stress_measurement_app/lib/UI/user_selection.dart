@@ -10,6 +10,7 @@ class UserSelection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userSelectionController = TextEditingController();
+    final ageController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
         title: const Text("User Selection"),
@@ -74,22 +75,72 @@ class UserSelection extends StatelessWidget {
                         ),
                       );
                     } else {
-                      await database.insertUser(selectedUser);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("User $selectedUser added")),
-                      );
-                      database.setCurrentUser(selectedUser);
-                      int userCount = await database.getCurrentAmount();
-                      print("Current user amount: $userCount");
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen(bluetooth: bluetooth),
-                        ),
-                      );
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                                title: const Text("Adding new user"),
+                                actions: [
+                                  Column(
+                                    children: [
+                                      const Text("Age"),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      Container(
+                                        width: 200,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(width: 1.0),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: TextField(
+                                          controller: ageController,
+                                          decoration: const InputDecoration(
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 12.0,
+                                                    vertical: 8.0),
+                                          ),
+                                          keyboardType: TextInputType.text,
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                          onPressed: () async {
+                                            int maxHeartRate = (208 -
+                                                    (0.7 *
+                                                        double.parse(
+                                                            ageController
+                                                                .text)))
+                                                .toInt();
+                                            await database.insertUser(
+                                                selectedUser, maxHeartRate);
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      "User $selectedUser added")),
+                                            );
+                                            database
+                                                .setCurrentUser(selectedUser);
+                                            int userCount = await database
+                                                .getCurrentAmount();
+                                            print(
+                                                "Current user amount: $userCount");
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    HomeScreen(
+                                                        bluetooth: bluetooth),
+                                              ),
+                                            );
+                                          },
+                                          child: const Text("Add")),
+                                    ],
+                                  )
+                                ],
+                              ));
                     }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

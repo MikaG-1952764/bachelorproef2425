@@ -7,7 +7,6 @@ class HeartRateGauge extends StatelessWidget {
   final int heartRate;
   final double minValue;
   final double maxValue;
-  final List<int> thresholdValues;
   final List<Color> rangeColors;
   final Bluetooth bluetooth;
 
@@ -16,8 +15,13 @@ class HeartRateGauge extends StatelessWidget {
     required this.heartRate,
     this.minValue = 50,
     this.maxValue = 150,
-    this.thresholdValues = const [120, 180, 250],
-    this.rangeColors = const [Colors.green, Colors.orange, Colors.red],
+    this.rangeColors = const [
+      Color.fromARGB(255, 0, 255, 9),
+      Color.fromARGB(255, 0, 158, 6),
+      Color.fromARGB(255, 255, 251, 0),
+      Colors.orange,
+      Colors.red
+    ],
     required this.bluetooth, // Default gradient colors
   });
 
@@ -88,6 +92,14 @@ class HeartRateGauge extends StatelessWidget {
 
   // Helper function to generate stops for the gradient dynamically
   List<double> _calculateStops() {
+    int maxHeartRate = 200;
+    List<int> thresholdValues = [
+      (maxHeartRate * 0.57).toInt(),
+      (maxHeartRate * 0.63).toInt(),
+      (maxHeartRate * 0.76).toInt(),
+      (maxHeartRate * 0.95).toInt(),
+      (maxHeartRate * 1.0).toInt(),
+    ];
     return thresholdValues.map((t) {
       return ((t - minValue) / (maxValue - minValue)).clamp(0.0, 1.0);
     }).toList();
