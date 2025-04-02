@@ -91,6 +91,15 @@ class AppDatabase extends _$AppDatabase {
         UsersCompanion(name: Value(name), maxHeartRate: Value(maxHeartRate)));
   }
 
+  Future<int?> getCurrentUserMaxHeartRate() async {
+    if (userId == null) return null;
+
+    final result = await (select(users)..where((u) => u.id.equals(userId!)))
+        .getSingleOrNull();
+
+    return result?.maxHeartRate;
+  }
+
   // Insert heart rate data
   Future<int> insertHeartRate(int measuredHeartRate) async {
     return into(heartRate).insert(
