@@ -258,4 +258,73 @@ class AppDatabase extends _$AppDatabase {
       return null; // If no user with that username was found
     }
   }
+
+  Future<List<Map<String, dynamic>>> getGSRReadingsInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(gsr)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'gsr': row.gsr,
+      };
+    }).get();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> getHeartRateReadingsInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(heartRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'heartRate': row.heartRate,
+      };
+    }).get();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> getSpo2ReadingsInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(spo2)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'spo2': row.spo2,
+      };
+    }).get();
+
+    return results;
+  }
 }

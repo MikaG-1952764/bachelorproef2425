@@ -43,6 +43,7 @@ dependencies:
   permission_handler: ^11.4.0
   drift: ^2.26.0
   drift_flutter: ^0.2.4
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

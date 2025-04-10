@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
 import 'package:stress_measurement_app/Widgets/data_row.dart';
+import 'package:intl/intl.dart';
 
 class DataHistoryPage extends StatelessWidget {
   const DataHistoryPage(
@@ -9,6 +10,8 @@ class DataHistoryPage extends StatelessWidget {
   final Bluetooth bluetooth;
   @override
   Widget build(BuildContext context) {
+    final TextEditingController startDateController = TextEditingController();
+    final TextEditingController endDateController = TextEditingController();
     Future<List<Map<String, dynamic>>> fetchData() {
       switch (pageName) {
         case "Heart Rate":
@@ -25,6 +28,81 @@ class DataHistoryPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("$pageName data history"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt_sharp),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Filter"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Select a date range"),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: startDateController,
+                            decoration: const InputDecoration(
+                              labelText: "Start Date",
+                              border: OutlineInputBorder(),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2101),
+                              ).then((pickedDate) {
+                                if (pickedDate != null) {
+                                  final formattedDate = DateFormat('dd/MM/yyyy')
+                                      .format(pickedDate);
+                                  startDateController.text = formattedDate;
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: endDateController,
+                            decoration: const InputDecoration(
+                              labelText: "End Date",
+                              border: OutlineInputBorder(),
+                            ),
+                            readOnly: true,
+                            onTap: () {
+                              showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2101),
+                              ).then((pickedDate) {
+                                if (pickedDate != null) {
+                                  final formattedDate = DateFormat('dd/MM/yyyy')
+                                      .format(pickedDate);
+                                  endDateController.text = formattedDate;
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("Apply"),
+                          onPressed: () {
+                            // Apply filter logic here
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  });
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
