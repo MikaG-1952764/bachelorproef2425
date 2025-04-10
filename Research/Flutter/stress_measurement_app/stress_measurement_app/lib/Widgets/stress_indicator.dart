@@ -24,7 +24,7 @@ class StressIndicator extends StatelessWidget {
           color: stressColor, borderRadius: BorderRadius.circular(10)),
       child: Center(
           child: Text(stressLevel,
-              style: const TextStyle(color: Colors.white, fontSize: 30))),
+              style: const TextStyle(color: Colors.white, fontSize: 26))),
     );
   }
 }
