@@ -4,9 +4,7 @@ import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Models/sensor_data.dart';
 import 'package:stress_measurement_app/UI/configering_page.dart';
 import 'package:stress_measurement_app/UI/user_selection.dart';
-import '../Widgets/heart_rate_gauge.dart';
-import '../Widgets/spo2_progress_bar.dart';
-import '../Widgets/gsr_line_chart.dart';
+import 'package:stress_measurement_app/Widgets/sensor_cards_pager.dart';
 import '../Widgets/stress_indicator.dart';
 import '../Widgets/bluetooth_device_dialog.dart';
 import '../Models/bluetooth.dart';
@@ -272,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Consumer<SensorData>(builder: (context, sensorData, _) {
                 return Column(
                   children: [
-                    SizedBox(
+                    /*SizedBox(
                       width: 300,
                       height: 50,
                       child: FloatingActionButton(
@@ -286,121 +284,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                 "Spo2 database readings: ${await widget.bluetooth.getDatabase().getSpo2Count()}");
                           }),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Center(
-                        child: SizedBox(
-                            width: 300,
-                            height: 80,
-                            child: StressIndicator(sensorData.gsr))),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.black, width: 6),
-                          color: Colors.white,
-                        ),
-                        width: 300,
-                        height: 480,
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                const Text('Heart Rate',
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold)),
-                                const Spacer(),
-                                IconButton(
-                                  icon: const Icon(Icons.settings),
-                                  onPressed: () =>
-                                      navigateToConfiguringHeartPage(context),
-                                ),
-                                const SizedBox(width: 10),
-                              ],
-                            ),
-                            Expanded(
-                              child:
-                                  minHeartValue != -1.0 && maxHeartValue != -1.0
-                                      ? HeartRateGauge(
-                                          heartRate: sensorData.heartRate,
-                                          minValue: minHeartValue,
-                                          maxValue: maxHeartValue,
-                                          bluetooth: widget.bluetooth,
-                                        )
-                                      : HeartRateGauge(
-                                          heartRate: sensorData.heartRate,
-                                          bluetooth: widget.bluetooth,
-                                        ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.black, width: 6),
-                        color: Colors.white,
-                      ),
+                    const SizedBox(height: 20),*/
+                    SizedBox(
                       width: 300,
-                      height: 300,
-                      child: Spo2ProgressBar(
-                        sensorData.spo2,
-                        bluetooth: widget.bluetooth,
-                      ),
+                      height: 60,
+                      child: StressIndicator(sensorData.gsr),
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.black, width: 6),
-                        color: Colors.white,
-                      ),
-                      width: 300,
-                      height: 490,
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              const Text('GSR',
-                                  style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold)),
-                              const Spacer(),
-                              IconButton(
-                                  onPressed: () =>
-                                      navigateToConfiguringGSRPage(context),
-                                  icon: const Icon(Icons.settings)),
-                              const SizedBox(
-                                width: 4,
-                              ),
-                            ],
-                          ),
-                          Expanded(
-                            child: minGSRValue != -1.0 && maxGSRValue != -1.0
-                                ? GsrLineChart(
-                                    gsr: sensorData.gsr,
-                                    minValue: minGSRValue,
-                                    maxValue: maxGSRValue,
-                                    bluetooth: widget.bluetooth,
-                                  )
-                                : GsrLineChart(
-                                    gsr: sensorData.gsr,
-                                    bluetooth: widget.bluetooth,
-                                  ),
-                          ),
-                        ],
-                      ),
+                    SensorCardsPager(
+                      minHeartValue: minHeartValue,
+                      maxHeartValue: maxHeartValue,
+                      minGSRValue: minGSRValue,
+                      maxGSRValue: maxGSRValue,
+                      sensorData: sensorData,
+                      bluetooth: widget.bluetooth,
+                      onHeartConfig: () =>
+                          navigateToConfiguringHeartPage(context),
+                      onGSRConfig: () => navigateToConfiguringGSRPage(context),
                     ),
                     const SizedBox(height: 10),
                   ],
