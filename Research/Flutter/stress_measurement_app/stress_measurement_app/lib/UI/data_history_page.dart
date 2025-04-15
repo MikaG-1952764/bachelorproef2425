@@ -71,9 +71,11 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     endDateController.clear();
                     dataFuture = fetchData();
                   });
-                  const SnackBar(
-                    content: Text("Filter removed"),
-                    duration: Duration(seconds: 2),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Filter removed"),
+                      duration: Duration(seconds: 2),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.filter_alt_off_sharp)),
@@ -140,6 +142,15 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                       ),
                       actions: [
                         TextButton(
+                          child: const Text("Cancel"),
+                          onPressed: () {
+                            startDateController.clear();
+                            endDateController.clear();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        TextButton(
                           child: const Text("Apply"),
                           onPressed: () {
                             final DateFormat formatter =
@@ -152,6 +163,15 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               isFilterActive = true;
                               dataFuture =
                                   fetchDataInRange(startDate!, endDate!);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      "Filtering between ${startDateController.text} and ${endDateController.text}"),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              startDateController.clear();
+                              endDateController.clear();
                             }); // Refresh the UI
                             Navigator.of(context).pop();
                           },
@@ -222,7 +242,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     final reading = entry.value;
                     return DataRowWidget(
                       number: index.toString(),
-                      date: reading['date'],
+                      date: _formatDate(reading['date']),
                       measurement: _formatMeasurement(reading),
                     );
                   }).toList(),
@@ -245,6 +265,21 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
         return "${reading['spo2']} ms"; // Example unit for spo2
       default:
         return "Unknown";
+    }
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      // Parse the American date string to a DateTime object
+      final DateFormat americanFormat = DateFormat('yyyy-MM-dd');
+      final DateTime parsedDate = americanFormat.parse(dateString);
+
+      // Convert the DateTime object to European format
+      final DateFormat europeanFormat = DateFormat('dd/MM/yyyy');
+      return europeanFormat.format(parsedDate);
+    } catch (e) {
+      print("Error parsing date: $e");
+      return dateString; // Return the original string if parsing fails
     }
   }
 }
