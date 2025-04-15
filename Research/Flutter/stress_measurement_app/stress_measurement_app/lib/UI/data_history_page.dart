@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
 import 'package:stress_measurement_app/Widgets/data_row.dart';
 import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class DataHistoryPage extends StatefulWidget {
   const DataHistoryPage(
@@ -187,6 +188,62 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
+            SizedBox(
+                height: 200,
+                width: 300,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: dataFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text("No data available."));
+                      }
+
+                      final data = snapshot.data!;
+                      return LineChart(LineChartData(
+                          titlesData: FlTitlesData(show: false),
+                          borderData: FlBorderData(show: false),
+                          gridData: FlGridData(show: true),
+                          lineBarsData: [
+                            LineChartBarData(
+                              isCurved: false,
+                              spots: [
+                                if (data.isNotEmpty)
+                                  FlSpot(
+                                      0,
+                                      data[0]
+                                          .values
+                                          .last
+                                          .toDouble()), // Using the first value of the first data object
+                                if (data.length > 1)
+                                  FlSpot(
+                                      0,
+                                      data[1]
+                                          .values
+                                          .last
+                                          .toDouble()), // First value of the second object
+                                if (data.length > 2)
+                                  FlSpot(
+                                      1,
+                                      data[2]
+                                          .values
+                                          .last
+                                          .toDouble()), // First value of the third object
+                                if (data.length > 3)
+                                  FlSpot(2, data[3].values.last.toDouble())
+                              ],
+                              dotData: FlDotData(show: true),
+                            )
+                          ]));
+                    },
+                  ),
+                )),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Container(
