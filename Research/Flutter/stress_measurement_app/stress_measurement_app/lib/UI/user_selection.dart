@@ -70,8 +70,10 @@ class UserSelection extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen(bluetooth: bluetooth),
+                          builder: (context) => HomeScreen(
+                            bluetooth: bluetooth,
+                            isNewUser: false,
+                          ),
                         ),
                       );
                     } else {
@@ -132,7 +134,9 @@ class UserSelection extends StatelessWidget {
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     HomeScreen(
-                                                        bluetooth: bluetooth),
+                                                  bluetooth: bluetooth,
+                                                  isNewUser: true,
+                                                ),
                                               ),
                                             );
                                           },

@@ -203,7 +203,7 @@ class Bluetooth with ChangeNotifier {
           List<int> data = [];
           while (measurements < 5) {
             print("Sending START AVERAGE HEART command...");
-            await characteristic.write(utf8.encode("START AVERAGE HEART"),
+            await characteristic.write(utf8.encode("START HEART"),
                 withoutResponse: false);
             measurements++;
             readData(
@@ -213,6 +213,8 @@ class Bluetooth with ChangeNotifier {
           }
           int averageHeartRate = data.reduce((a, b) => a + b) ~/ data.length;
           print("Average Heart Rate: $averageHeartRate");
+          measurements = 0;
+          data.clear();
           return averageHeartRate;
         }
       }
@@ -274,6 +276,42 @@ class Bluetooth with ChangeNotifier {
       }
     }
     print("START command characteristic not found");
+  }
+
+  Future<int> averageGSRMeasurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          int measurements = 0;
+          List<int> data = [];
+          while (measurements < 5) {
+            print("Sending START AVERAGE GSR command...");
+            await characteristic.write(utf8.encode("START GSR"),
+                withoutResponse: false);
+            measurements++;
+            readData(
+              sensorData,
+            );
+            data.add(sensorData.gsr);
+          }
+          int averageGSR = data.reduce((a, b) => a + b) ~/ data.length;
+          print("Average GSR: $averageGSR");
+          measurements = 0;
+          data.clear();
+          return averageGSR;
+        }
+      }
+    }
+    print("Average GSR command not working");
+    return 0; // Return 0 if no data is found
   }
 
   Future<void> stopMeasurement() async {
