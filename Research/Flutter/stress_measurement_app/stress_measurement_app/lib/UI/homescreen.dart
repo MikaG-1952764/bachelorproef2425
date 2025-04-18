@@ -339,10 +339,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             const Text(
-                "Because you are a new user, we need to measure the average heart rate and gsr. Put the fungerwraps over 2 fingers of your choice. After this take the heart rate sensor in between 2 fingers and provide a constant but hard pressure. You can know press Continue to start the measurements."),
+                "Because you are a new user, we need to measure the average heart rate and average gsr. Put the fungerwraps over 2 fingers of your choice. After this take the heart rate sensor in between 2 fingers and provide a constant but hard pressure. You can know press the button below to start the measurements."),
             SizedBox(
               width: 200,
-              height: 50,
+              height: 60,
               child: FloatingActionButton(
                   onPressed: () {
                     bluetooth.averageHeartRateMeasurement(
@@ -350,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     bluetooth.averageGSRMeasurement(
                         Provider.of<SensorData>(context, listen: false));
                   },
-                  child: const Text("Continue")),
+                  child: const Text("Start measurement")),
             ),
           ],
         ),
