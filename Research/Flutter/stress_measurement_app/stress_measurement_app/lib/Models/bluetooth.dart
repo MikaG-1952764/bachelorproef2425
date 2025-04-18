@@ -187,6 +187,40 @@ class Bluetooth with ChangeNotifier {
     print("START command characteristic not found");
   }
 
+  Future<int> averageHeartRateMeasurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          int measurements = 0;
+          List<int> data = [];
+          while (measurements < 5) {
+            print("Sending START AVERAGE HEART command...");
+            await characteristic.write(utf8.encode("START AVERAGE HEART"),
+                withoutResponse: false);
+            measurements++;
+            readData(
+              sensorData,
+            );
+            data.add(sensorData.heartRate);
+          }
+          int averageHeartRate = data.reduce((a, b) => a + b) ~/ data.length;
+          print("Average Heart Rate: $averageHeartRate");
+          return averageHeartRate;
+        }
+      }
+    }
+    print("Average Heart Rate command not working");
+    return 0; // Return 0 if no data is found
+  }
+
   Future<void> startSpo2Measurement(SensorData sensorData) async {
     if (connectedDevice == null) {
       print("No device connected");
