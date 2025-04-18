@@ -202,17 +202,19 @@ class Bluetooth with ChangeNotifier {
           int measurements = 0;
           List<int> data = [];
           while (measurements < 20) {
-            print("Sending START AVERAGE HEART command...");
+            print("Sending START HEART command...");
             isMeasuring = true;
             await characteristic.write(utf8.encode("START HEART"),
                 withoutResponse: false);
             measurements++;
-            newData = "HR"; // Set the newData variable to "HR"
+            newData = "all"; // Set the newData variable to "HR"
             readData(
               sensorData,
             );
+            print("Heart Rate: ${sensorData.heartRate}");
             data.add(sensorData.heartRate);
           }
+          print("Heart Rate data size: ${data.length}");
           int averageHeartRate = data.reduce((a, b) => a + b) ~/ data.length;
           print("Average Heart Rate: $averageHeartRate");
           measurements = 0;
@@ -295,16 +297,17 @@ class Bluetooth with ChangeNotifier {
           int measurements = 0;
           List<int> data = [];
           while (measurements < 20) {
-            print("Sending START AVERAGE GSR command...");
+            print("Sending START GSR command...");
             await characteristic.write(utf8.encode("START GSR"),
                 withoutResponse: false);
             measurements++;
-            newData = "GSR"; // Set the newData variable to "GSR"
+            newData = "all"; // Set the newData variable to "GSR"
             readData(
               sensorData,
             );
             data.add(sensorData.gsr);
           }
+          print("GSR data size: ${data.length}");
           int averageGSR = data.reduce((a, b) => a + b) ~/ data.length;
           print("Average GSR: $averageGSR");
           measurements = 0;

@@ -408,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           );
                                         },
                                         child: const SizedBox(
-                                            width: 100,
+                                            width: 140,
                                             child: Text("Continue")),
                                       ),
                                     ]));
