@@ -385,13 +385,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.pop(context);
                       print("Average heart rate: $avgHeartRate");
                       print("Average GSR: $avgGSR");
+                      bluetooth
+                          .getDatabase()
+                          .updateAverageHeartRate(avgHeartRate);
+                      bluetooth.getDatabase().updateAverageGSR(avgGSR);
                       showDialog(
                           context: context,
                           barrierDismissible: false,
                           builder: (BuildContext context) => AlertDialog(
                                   title: const Text("Measurement complete"),
                                   content: const Text(
-                                      "All averages are measured. Click continue to go to the home screen."),
+                                      "All averages are measured. Press the 'home' button to go to the homescreen."),
                                   actions: [
                                     FloatingActionButton(
                                       onPressed: () {
@@ -408,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       child: const SizedBox(
                                           height: 40,
                                           width: 140,
-                                          child: Text("Continue")),
+                                          child: Text("Home")),
                                     ),
                                   ]));
                     }
