@@ -13,6 +13,8 @@ class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().named('Your name')();
   IntColumn get maxHeartRate => integer().nullable()();
+  IntColumn get averageHeartRate => integer().nullable()();
+  IntColumn get averageGSR => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
@@ -98,6 +100,52 @@ class AppDatabase extends _$AppDatabase {
         .getSingleOrNull();
 
     return result?.maxHeartRate;
+  }
+
+  Future<int?> getCurrentUserAverageHeartRate() async {
+    if (userId == null) return null;
+
+    final result = await (select(users)..where((u) => u.id.equals(userId!)))
+        .getSingleOrNull();
+
+    return result?.averageHeartRate;
+  }
+
+  Future<int?> getCurrentUserAverageGSR() async {
+    if (userId == null) return null;
+
+    final result = await (select(users)..where((u) => u.id.equals(userId!)))
+        .getSingleOrNull();
+
+    return result?.averageGSR;
+  }
+
+  Future<bool> updateAverageHeartRate(int measuredAverageHeartRate) async {
+    if (userId == null) {
+      print("User ID is null. Cannot update average heart rate.");
+      return false;
+    }
+
+    final rowsUpdated =
+        await (update(users)..where((u) => u.id.equals(userId!))).write(
+      UsersCompanion(
+        averageHeartRate: Value(measuredAverageHeartRate),
+      ),
+    );
+    print("Rows updated: $rowsUpdated");
+    return rowsUpdated > 0;
+  }
+
+  Future<bool> updateAverageGSR(int measuredAverageGSR) async {
+    if (userId == null) return false;
+
+    final rowsUpdated =
+        await (update(users)..where((u) => u.id.equals(userId!))).write(
+      UsersCompanion(
+        averageGSR: Value(measuredAverageGSR),
+      ),
+    );
+    return rowsUpdated > 0;
   }
 
   // Insert heart rate data

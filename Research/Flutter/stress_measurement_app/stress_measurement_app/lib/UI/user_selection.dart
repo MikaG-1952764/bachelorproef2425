@@ -70,8 +70,10 @@ class UserSelection extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen(bluetooth: bluetooth),
+                          builder: (context) => HomeScreen(
+                            bluetooth: bluetooth,
+                            isNewUser: false,
+                          ),
                         ),
                       );
                     } else {
@@ -126,13 +128,15 @@ class UserSelection extends StatelessWidget {
                                             int userCount = await database
                                                 .getCurrentAmount();
                                             print(
-                                                "Current user amount: $userCount");
+                                                "Current user amount: ${database.getCurrentUser()}");
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) =>
                                                     HomeScreen(
-                                                        bluetooth: bluetooth),
+                                                  bluetooth: bluetooth,
+                                                  isNewUser: true,
+                                                ),
                                               ),
                                             );
                                           },
