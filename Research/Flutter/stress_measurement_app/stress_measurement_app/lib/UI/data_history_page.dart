@@ -206,40 +206,73 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
                       final data = snapshot.data!;
                       return LineChart(LineChartData(
-                          titlesData: FlTitlesData(show: false),
-                          borderData: FlBorderData(show: false),
-                          gridData: FlGridData(show: true),
-                          lineBarsData: [
-                            LineChartBarData(
-                              isCurved: false,
-                              spots: [
-                                if (data.isNotEmpty)
-                                  FlSpot(
-                                      0,
-                                      data[0]
-                                          .values
-                                          .last
-                                          .toDouble()), // Using the first value of the first data object
-                                if (data.length > 1)
-                                  FlSpot(
-                                      0,
-                                      data[1]
-                                          .values
-                                          .last
-                                          .toDouble()), // First value of the second object
-                                if (data.length > 2)
-                                  FlSpot(
-                                      1,
-                                      data[2]
-                                          .values
-                                          .last
-                                          .toDouble()), // First value of the third object
-                                if (data.length > 3)
-                                  FlSpot(2, data[3].values.last.toDouble())
-                              ],
-                              dotData: FlDotData(show: true),
-                            )
-                          ]));
+                        titlesData: const FlTitlesData(show: false),
+                        borderData: FlBorderData(show: false),
+                        gridData: const FlGridData(show: true),
+                        lineBarsData: [
+                          LineChartBarData(
+                            isCurved: false,
+                            spots: [
+                              if (data.isNotEmpty)
+                                FlSpot(
+                                    0,
+                                    data[0]
+                                        .values
+                                        .last
+                                        .toDouble()), // Using the first value of the first data object
+                              if (data.length > 1)
+                                FlSpot(
+                                    1,
+                                    data[1]
+                                        .values
+                                        .last
+                                        .toDouble()), // First value of the second object
+                              if (data.length > 2)
+                                FlSpot(
+                                    2,
+                                    data[2]
+                                        .values
+                                        .last
+                                        .toDouble()), // First value of the third object
+                              if (data.length > 3)
+                                FlSpot(3, data[3].values.last.toDouble()),
+                              if (data.length > 4)
+                                FlSpot(4, data[4].values.last.toDouble()),
+                              if (data.length > 5)
+                                FlSpot(5, data[5].values.last.toDouble()),
+                              if (data.length > 6)
+                                FlSpot(6, data[6].values.last.toDouble()),
+                              if (data.length > 7)
+                                FlSpot(7, data[7].values.last.toDouble()),
+                              if (data.length > 8)
+                                FlSpot(8, data[8].values.last.toDouble()),
+                              if (data.length > 9)
+                                FlSpot(9, data[9].values.last.toDouble()),
+                              if (data.length > 10)
+                                FlSpot(10, data[10].values.last.toDouble()),
+                            ],
+                            dotData: const FlDotData(show: true),
+                            belowBarData: BarAreaData(show: true),
+                          )
+                        ],
+                        minX: -0.5, // Add padding by adjusting the minX
+                        maxX: data.length.toDouble() + 0.5,
+                        minY: _getMinY(widget.pageName),
+                        maxY: _getMaxY(widget.pageName),
+                        // Adjust this based on your data range
+                        lineTouchData: LineTouchData(
+                          touchTooltipData: LineTouchTooltipData(
+                            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                              return touchedSpots.map((spot) {
+                                return LineTooltipItem(
+                                  "${spot.y}",
+                                  const TextStyle(color: Colors.white),
+                                );
+                              }).toList();
+                            },
+                          ),
+                        ),
+                      ));
                     },
                   ),
                 )),
@@ -337,6 +370,32 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     } catch (e) {
       print("Error parsing date: $e");
       return dateString; // Return the original string if parsing fails
+    }
+  }
+
+  double? _getMinY(String pageName) {
+    switch (pageName) {
+      case "Heart Rate":
+        return 0;
+      case "GSR":
+        return null; // Example, adjust based on your GSR data range
+      case "Spo2":
+        return 0; // Example, adjust based on your SpO2 data range
+      default:
+        return null; // Default minY
+    }
+  }
+
+  double? _getMaxY(String pageName) {
+    switch (pageName) {
+      case "Heart Rate":
+        return 340; // Adjust according to your HR data range
+      case "GSR":
+        return null; // Example, adjust based on your GSR data range
+      case "Spo2":
+        return 140; // Example, adjust based on your SpO2 data range
+      default:
+        return null; // Default maxY
     }
   }
 }
