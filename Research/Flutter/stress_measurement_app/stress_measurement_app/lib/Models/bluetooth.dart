@@ -208,11 +208,9 @@ class Bluetooth with ChangeNotifier {
                 withoutResponse: false);
             measurements++;
             newData = "all"; // Set the newData variable to "HR"
-            readData(
-              sensorData,
-            );
-            print("Heart Rate: ${sensorData.heartRate}");
-            data.add(sensorData.heartRate);
+            SensorData result = await readSingleData("HR");
+            print("Heart Rate: ${result.heartRate}");
+            data.add(result.heartRate);
           }
           print("Heart Rate data size: ${data.length}");
           int averageHeartRate = data.reduce((a, b) => a + b) ~/ data.length;
@@ -302,10 +300,9 @@ class Bluetooth with ChangeNotifier {
                 withoutResponse: false);
             measurements++;
             newData = "all"; // Set the newData variable to "GSR"
-            readData(
-              sensorData,
-            );
-            data.add(sensorData.gsr);
+            SensorData result = await readSingleData("gsr");
+            print("Average GSR measurement: ${result.gsr}");
+            data.add(result.gsr);
           }
           print("GSR data size: ${data.length}");
           int averageGSR = data.reduce((a, b) => a + b) ~/ data.length;
@@ -431,5 +428,50 @@ class Bluetooth with ChangeNotifier {
         }
       }
     }
+  }
+
+  Future<SensorData> readSingleData(String dataType) async {
+    final completer = Completer<SensorData>();
+
+    if (connectedDevice == null || !isMeasuring) {
+      print("No device found or measurement not active");
+      return SensorData(heartRate: 0, spo2: 0, gsr: 0);
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) {
+          if (characteristic.properties.notify) {
+            await characteristic.setNotifyValue(true);
+
+            StreamSubscription? sub;
+            sub = characteristic.lastValueStream.listen((value) async {
+              if (value.isEmpty) return;
+
+              String receivedData = String.fromCharCodes(value);
+              print("Notification Data: $receivedData");
+
+              List<String> parts = receivedData.split(' ');
+              if (parts.length == 3) {
+                int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
+                int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
+                int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+
+                final sensorData =
+                    SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
+                await characteristic.setNotifyValue(false);
+                await sub?.cancel();
+                completer.complete(sensorData);
+              }
+            });
+          }
+        }
+      }
+    }
+
+    return completer.future;
   }
 }
