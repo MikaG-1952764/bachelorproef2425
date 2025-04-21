@@ -275,21 +275,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 Consumer<SensorData>(builder: (context, sensorData, _) {
                   return Column(
                     children: [
-                      /*SizedBox(
-                      width: 300,
-                      height: 50,
-                      child: FloatingActionButton(
-                          child: const Text("Print data amount (debug)"),
-                          onPressed: () async {
-                            print(
-                                "Heart rate database readings: ${await widget.bluetooth.getDatabase().getHeartRateCount()}");
-                            print(
-                                "GSR database readings: ${await widget.bluetooth.getDatabase().getGSRCount()}");
-                            print(
-                                "Spo2 database readings: ${await widget.bluetooth.getDatabase().getSpo2Count()}");
-                          }),
-                    ),
-                    const SizedBox(height: 20),*/
+                      SizedBox(
+                        width: 300,
+                        height: 50,
+                        child: FloatingActionButton(
+                            child: const Text("Print data amount (debug)"),
+                            onPressed: () async {
+                              final avgHeartRate = await widget.bluetooth
+                                  .getDatabase()
+                                  .getCurrentUserAverageHeartRate();
+                              final avgGSR = await widget.bluetooth
+                                  .getDatabase()
+                                  .getCurrentUserAverageGSR();
+                              print(
+                                  "Average heart rate out of database: ${avgHeartRate}");
+                              print("Average GSR out of database: ${avgGSR}");
+                            }),
+                      ),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: 300,
                         height: 60,
@@ -381,14 +384,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                     final avgHeartRate = await bluetooth.getAverageHeartRate();
                     final avgGSR = await bluetooth.getAverageGSR();
+
+                    bluetooth
+                        .getDatabase()
+                        .updateAverageHeartRate(avgHeartRate);
+                    if (avgGSR != null) {
+                      print("avgGSR: $avgGSR");
+                      bluetooth.getDatabase().updateAverageGSR(avgGSR);
+                    } else {
+                      print("Error: avgGSR was null");
+                      // Optionally show a dialog to the user here
+                    }
                     if (context.mounted) {
                       Navigator.pop(context);
-                      print("Average heart rate: $avgHeartRate");
-                      print("Average GSR: $avgGSR");
-                      bluetooth
-                          .getDatabase()
-                          .updateAverageHeartRate(avgHeartRate);
-                      bluetooth.getDatabase().updateAverageGSR(avgGSR);
                       showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -398,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       "All averages are measured. Press the 'home' button to go to the homescreen."),
                                   actions: [
                                     FloatingActionButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

@@ -121,7 +121,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<bool> updateAverageHeartRate(int measuredAverageHeartRate) async {
-    if (userId == null) return false;
+    if (userId == null) {
+      print("User ID is null. Cannot update average heart rate.");
+      return false;
+    }
 
     final rowsUpdated =
         await (update(users)..where((u) => u.id.equals(userId!))).write(
@@ -129,6 +132,7 @@ class AppDatabase extends _$AppDatabase {
         averageHeartRate: Value(measuredAverageHeartRate),
       ),
     );
+    print("Rows updated: $rowsUpdated");
     return rowsUpdated > 0;
   }
 

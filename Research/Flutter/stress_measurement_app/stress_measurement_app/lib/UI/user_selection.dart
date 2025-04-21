@@ -128,7 +128,7 @@ class UserSelection extends StatelessWidget {
                                             int userCount = await database
                                                 .getCurrentAmount();
                                             print(
-                                                "Current user amount: $userCount");
+                                                "Current user amount: ${database.getCurrentUser()}");
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
