@@ -132,8 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ],
                                   ));
-                        } else if (bluetooth.isMeasuring) {
-                          await bluetooth.stopMeasurement();
                         } else {
                           showDialog(
                               context: context,
@@ -356,8 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 200,
               height: 60,
               child: FloatingActionButton(
-                onPressed: () {
-                  print(bluetooth.connectedDevice);
+                onPressed: () async {
                   if (bluetooth.connectedDevice == null) {
                     showDialog(
                         context: context,
@@ -374,46 +371,47 @@ class _HomeScreenState extends State<HomeScreen> {
                             ));
                   } else {
                     showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) => const AlertDialog(
-                              title: Text("Measuring"),
-                              content: Text(
-                                  "Measuring average heart rate and GSR..."),
-                            ));
-                    print(
-                        "Average heart rate: ${bluetooth.averageHeartRateMeasurement(Provider.of<SensorData>(context, listen: false))}");
-                    print(
-                        "Average GSR: ${bluetooth.averageGSRMeasurement(Provider.of<SensorData>(context, listen: false))}");
-                    Future.delayed(const Duration(seconds: 4), () {
-                      if (bluetooth.isMeasuring == false) {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) => AlertDialog(
-                                    title: const Text("Measurement complete"),
-                                    content: const Text(
-                                        "All averages are measured. Click continue to go to the home screen."),
-                                    actions: [
-                                      FloatingActionButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => HomeScreen(
-                                                bluetooth: bluetooth,
-                                                isNewUser: false,
-                                              ),
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) => const AlertDialog(
+                        title: Text("Measuring"),
+                        content:
+                            Text("Measuring average heart rate and GSR..."),
+                      ),
+                    );
+                    final avgHeartRate = await bluetooth.getAverageHeartRate();
+                    final avgGSR = await bluetooth.getAverageGSR();
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      print("Average heart rate: $avgHeartRate");
+                      print("Average GSR: $avgGSR");
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => AlertDialog(
+                                  title: const Text("Measurement complete"),
+                                  content: const Text(
+                                      "All averages are measured. Click continue to go to the home screen."),
+                                  actions: [
+                                    FloatingActionButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => HomeScreen(
+                                              bluetooth: bluetooth,
+                                              isNewUser: false,
                                             ),
-                                          );
-                                        },
-                                        child: const SizedBox(
-                                            width: 140,
-                                            child: Text("Continue")),
-                                      ),
-                                    ]));
-                      }
-                    });
+                                          ),
+                                        );
+                                      },
+                                      child: const SizedBox(
+                                          height: 40,
+                                          width: 140,
+                                          child: Text("Continue")),
+                                    ),
+                                  ]));
+                    }
                   }
                 },
                 child: const Text("Start measurement"),

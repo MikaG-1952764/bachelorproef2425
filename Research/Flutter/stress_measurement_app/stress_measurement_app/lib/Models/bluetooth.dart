@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stress_measurement_app/Models/database.dart';
@@ -187,7 +188,7 @@ class Bluetooth with ChangeNotifier {
     print("START command characteristic not found");
   }
 
-  Future<int> averageHeartRateMeasurement(SensorData sensorData) async {
+  Future<void> stopMeasurement() async {
     if (connectedDevice == null) {
       print("No device connected");
       notifyListeners();
@@ -199,30 +200,18 @@ class Bluetooth with ChangeNotifier {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
-          int measurements = 0;
-          List<int> data = [];
-          while (measurements < 20) {
-            print("Sending START HEART command...");
-            isMeasuring = true;
-            await characteristic.write(utf8.encode("START HEART"),
-                withoutResponse: false);
-            measurements++;
-            newData = "all"; // Set the newData variable to "HR"
-            SensorData result = await readSingleData("HR");
-            print("Heart Rate: ${result.heartRate}");
-            data.add(result.heartRate);
-          }
-          print("Heart Rate data size: ${data.length}");
-          int averageHeartRate = data.reduce((a, b) => a + b) ~/ data.length;
-          print("Average Heart Rate: $averageHeartRate");
-          measurements = 0;
-          data.clear(); // Stop measuring after getting average
-          return averageHeartRate;
+          print("Sending STOP command...");
+          await characteristic.write(utf8.encode("STOP"),
+              withoutResponse: false);
+          isMeasuring = false;
+          newData = "HR"; // Set the newData variable to "HR"
+          print("Measurement stopped");
+
+          notifyListeners();
         }
       }
     }
-    print("Average Heart Rate command not working");
-    return 0; // Return 0 if no data is found
+    print("STOP command characteristic not found");
   }
 
   Future<void> startSpo2Measurement(SensorData sensorData) async {
@@ -278,68 +267,6 @@ class Bluetooth with ChangeNotifier {
       }
     }
     print("START command characteristic not found");
-  }
-
-  Future<int> averageGSRMeasurement(SensorData sensorData) async {
-    if (connectedDevice == null) {
-      print("No device connected");
-      notifyListeners();
-    }
-
-    List<fbp.BluetoothService> services =
-        await connectedDevice!.discoverServices();
-    for (var service in services) {
-      for (var characteristic in service.characteristics) {
-        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
-          // Command Characteristic
-          int measurements = 0;
-          List<int> data = [];
-          while (measurements < 20) {
-            print("Sending START GSR command...");
-            await characteristic.write(utf8.encode("START GSR"),
-                withoutResponse: false);
-            measurements++;
-            newData = "all"; // Set the newData variable to "GSR"
-            SensorData result = await readSingleData("gsr");
-            print("Average GSR measurement: ${result.gsr}");
-            data.add(result.gsr);
-          }
-          print("GSR data size: ${data.length}");
-          int averageGSR = data.reduce((a, b) => a + b) ~/ data.length;
-          print("Average GSR: $averageGSR");
-          measurements = 0;
-          data.clear();
-          isMeasuring = false;
-          return averageGSR;
-        }
-      }
-    }
-    print("Average GSR command not working");
-    return 0; // Return 0 if no data is found
-  }
-
-  Future<void> stopMeasurement() async {
-    if (connectedDevice == null) {
-      print("No device connected");
-      notifyListeners();
-    }
-
-    List<fbp.BluetoothService> services =
-        await connectedDevice!.discoverServices();
-    for (var service in services) {
-      for (var characteristic in service.characteristics) {
-        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
-          // Command Characteristic
-          print("Sending STOP command...");
-          await characteristic.write(utf8.encode("STOP"),
-              withoutResponse: false);
-          isMeasuring = false;
-          print("Measurement stopped");
-          notifyListeners();
-        }
-      }
-    }
-    print("STOP command characteristic not found");
   }
 
   int receivedDataCount = 0; // Counter to track received data
@@ -421,7 +348,6 @@ class Bluetooth with ChangeNotifier {
                 await characteristic.setNotifyValue(false);
                 receivedDataCount = 0;
                 print("Received readings: $receivedDataCount");
-                stopMeasurement();
               }
             });
           }
@@ -430,48 +356,161 @@ class Bluetooth with ChangeNotifier {
     }
   }
 
-  Future<SensorData> readSingleData(String dataType) async {
-    final completer = Completer<SensorData>();
-
-    if (connectedDevice == null || !isMeasuring) {
+  Future<SensorData> readSingleData(SensorData sensorData) async {
+    if (connectedDevice == null) {
       print("No device found or measurement not active");
-      return SensorData(heartRate: 0, spo2: 0, gsr: 0);
+      return sensorData;
     }
+
+    final completer = Completer<SensorData>();
 
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
-
     for (var service in services) {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6e")) {
+          // Data Characteristic
           if (characteristic.properties.notify) {
             await characteristic.setNotifyValue(true);
 
-            StreamSubscription? sub;
-            sub = characteristic.lastValueStream.listen((value) async {
-              if (value.isEmpty) return;
+            characteristic.lastValueStream.listen((value) async {
+              if (value.isEmpty) {
+                print("No data received");
+                return;
+              }
 
               String receivedData = String.fromCharCodes(value);
               print("Notification Data: $receivedData");
 
+              // Parse data if it follows "HR: X, SpO2: Y, GSR: Z"
               List<String> parts = receivedData.split(' ');
               if (parts.length == 3) {
                 int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
                 int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
                 int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
 
-                final sensorData =
-                    SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
-                await characteristic.setNotifyValue(false);
-                await sub?.cancel();
-                completer.complete(sensorData);
+                sensorData.setData(hr, spo2, gsr);
+
+                print(
+                    "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
+                completer
+                    .complete(sensorData); // Complete when data is available
+              }
+              value.clear(); // Clear the value to prevent multiple triggers
+            });
+
+            // Optional timeout to prevent hanging forever
+            Future.delayed(const Duration(seconds: 10), () {
+              if (!completer.isCompleted) {
+                completer.complete(sensorData); // Complete even if no data
               }
             });
+
+            return completer.future; // Wait for the result before continuing
           }
         }
       }
     }
 
-    return completer.future;
+    return sensorData; // Return the sensorData if no suitable characteristic is found
+  }
+
+  Future<int> getAverageHeartRate() async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+      return 0;
+    }
+
+    SensorData sensorData = SensorData(heartRate: 0, spo2: 0, gsr: 0);
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          int validMeasurements = 0;
+          List<int> heartRateValues = [];
+          while (validMeasurements <= 6) {
+            print("Sending START HEART command...");
+            await characteristic.write(utf8.encode("START HEART"),
+                withoutResponse: false);
+            print("Measurement started");
+
+            sensorData.setData(0, 0, 0);
+            // Wait for the data to come back before proceeding
+            SensorData data = await readSingleData(sensorData);
+
+            if (data.heartRate > 20 && data.heartRate < 180) {
+              validMeasurements++;
+              heartRateValues.add(data.heartRate);
+              print(
+                  "Valid heart rate data received: ${data.heartRate}, $validMeasurements");
+            } else {
+              print("Invalid heart rate data received: ${data.heartRate}");
+            }
+
+            await Future.delayed(const Duration(
+                seconds: 1)); // Wait 1 second before next attempt
+          }
+          stopMeasurement(); // Stop the measurement after collecting data
+          // Return the average after collecting enough valid data
+          return (heartRateValues.reduce((a, b) => a + b) /
+                  heartRateValues.length)
+              .round();
+        }
+      }
+    }
+
+    print("START command characteristic not found");
+    throw Exception("Unable to calculate average heart rate");
+  }
+
+  Future<int> getAverageGSR() async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+      return 0;
+    }
+
+    SensorData sensorData = SensorData(heartRate: 0, spo2: 0, gsr: 0);
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          int validMeasurements = 0;
+          List<int> GSRValues = [];
+          while (validMeasurements <= 6) {
+            print("Sending START GSR command...");
+            await characteristic.write(utf8.encode("START GSR"),
+                withoutResponse: false); // Set the newData variable to "GSR"
+            print("Measurement started");
+
+            sensorData.setData(0, 0, 0);
+            // Wait for the data to come back before proceeding
+            SensorData data = await readSingleData(sensorData);
+
+            if (data.gsr >= 0 && data.gsr < 3000) {
+              validMeasurements++;
+              GSRValues.add(data.gsr);
+              print("Valid gsr data received: ${data.gsr}, $validMeasurements");
+            } else {
+              print("Invalid gsr data received: ${data.gsr}");
+            }
+
+            await Future.delayed(const Duration(
+                seconds: 1)); // Wait 1 second before next attempt
+          }
+          stopMeasurement();
+          // Return the average after collecting enough valid data
+          return (GSRValues.reduce((a, b) => a + b) / GSRValues.length).round();
+        }
+      }
+    }
+
+    print("START command characteristic not found");
+    throw Exception("Unable to calculate average gsr");
   }
 }
