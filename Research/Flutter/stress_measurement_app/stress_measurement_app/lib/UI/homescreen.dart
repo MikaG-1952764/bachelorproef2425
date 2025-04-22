@@ -1,9 +1,13 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Models/sensor_data.dart';
 import 'package:stress_measurement_app/UI/configering_page.dart';
 import 'package:stress_measurement_app/UI/user_selection.dart';
+import 'package:stress_measurement_app/Widgets/pager_widget.dart';
 import 'package:stress_measurement_app/Widgets/sensor_cards_pager.dart';
 import '../Widgets/stress_indicator.dart';
 import '../Widgets/bluetooth_device_dialog.dart';
@@ -75,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     AppDatabase database = widget.bluetooth.getDatabase();
     String currentUser = database.getCurrentUser();
+
     if (widget.isNewUser) {
       return homePageNewUser(context, widget.bluetooth);
     } else {
@@ -324,6 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Scaffold homePageNewUser(BuildContext context, Bluetooth bluetooth) {
+    final PageController pageController = PageController();
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 148, 204, 250),
       appBar: AppBar(
@@ -351,82 +357,194 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: Column(
           children: [
-            const Text(
-                "Because you are a new user, we need to measure the average heart rate and average gsr. Put the fungerwraps over 2 fingers of your choice. After this take the heart rate sensor in between 2 fingers and provide a constant but hard pressure on the sensor. You can know press the button below to start the measurements."),
-            SizedBox(
-              width: 200,
-              height: 60,
-              child: FloatingActionButton(
-                onPressed: () async {
-                  if (bluetooth.connectedDevice == null) {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) => AlertDialog(
-                              title: const Text("No Device Connected"),
-                              content: const Text(
-                                  "Please connect to a device to start measurement"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("OK"),
+            const SizedBox(
+              height: 40,
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 500,
+                    width: 350,
+                    child: PagerWidget(controller: pageController, pages: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(color: Colors.black, width: 3),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10),
+                              Text("Measurement configuration",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 40),
+                              Text(
+                                "As a new user a configuration for the heart rate and GSR is needed. In this step your average heart rate and GSR will be measured to later make the right assesments. Please make sure that the device is connected to the app.",
+                                style: TextStyle(
+                                  fontSize: 20,
                                 ),
-                              ],
-                            ));
-                  } else {
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) => const AlertDialog(
-                        title: Text("Measuring"),
-                        content:
-                            Text("Measuring average heart rate and GSR..."),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    );
-                    final avgHeartRate = await bluetooth.getAverageHeartRate();
-                    final avgGSR = await bluetooth.getAverageGSR();
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(color: Colors.black, width: 3),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10),
+                              Text("Step 1: GSR sensor ",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 20),
+                              Text(
+                                  "The GSR sensor measures the electrical conductance of the skin (how much sweat is on the skin). This is a good indicator of stress. Take the two wrappers and place them on the index and middle finger. After the measurement is started, the sensor will measure your GSR until it has enough data to take an average reading from.",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(color: Colors.black, width: 3),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              const Text("Step 2: Heart rate sensor",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 20),
+                              const Text(
+                                  "Take the heart rate sensor. Place the red light in between your thumb and index finger. Use some light but constant pressure on the led. This is important to get a good reading. After the measurement is started, the sensor will measure your heart rate until it has enough data to take an average reading from.",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  )),
+                              const SizedBox(height: 50),
+                              SizedBox(
+                                width: 200,
+                                height: 60,
+                                child: FloatingActionButton(
+                                  onPressed: () async {
+                                    if (bluetooth.connectedDevice == null) {
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                                title: const Text(
+                                                    "No Device Connected"),
+                                                content: const Text(
+                                                    "Please connect to a device to start measurement"),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                    child: const Text("OK"),
+                                                  ),
+                                                ],
+                                              ));
+                                    } else {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (BuildContext context) =>
+                                            const AlertDialog(
+                                          title: Text("Measuring"),
+                                          content: Text(
+                                              "Measuring average heart rate and GSR..."),
+                                        ),
+                                      );
+                                      final avgHeartRate =
+                                          await bluetooth.getAverageHeartRate();
+                                      final avgGSR =
+                                          await bluetooth.getAverageGSR();
 
-                    bluetooth
-                        .getDatabase()
-                        .updateAverageHeartRate(avgHeartRate);
-                    if (avgGSR != null) {
-                      print("avgGSR: $avgGSR");
-                      bluetooth.getDatabase().updateAverageGSR(avgGSR);
-                    } else {
-                      print("Error: avgGSR was null");
-                      // Optionally show a dialog to the user here
-                    }
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) => AlertDialog(
-                                  title: const Text("Measurement complete"),
-                                  content: const Text(
-                                      "All averages are measured. Press the 'home' button to go to the homescreen."),
-                                  actions: [
-                                    FloatingActionButton(
-                                      onPressed: () async {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                              bluetooth: bluetooth,
-                                              isNewUser: false,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: const SizedBox(
-                                          height: 40,
-                                          width: 140,
-                                          child: Text("Home")),
-                                    ),
-                                  ]));
-                    }
-                  }
-                },
-                child: const Text("Start measurement"),
+                                      bluetooth
+                                          .getDatabase()
+                                          .updateAverageHeartRate(avgHeartRate);
+                                      bluetooth
+                                          .getDatabase()
+                                          .updateAverageGSR(avgGSR);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) =>
+                                                AlertDialog(
+                                                    title: const Text(
+                                                        "Measurement complete"),
+                                                    content: const Text(
+                                                        "All averages are measured. Press the 'home' button to go to the homescreen."),
+                                                    actions: [
+                                                      FloatingActionButton(
+                                                        onPressed: () async {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder:
+                                                                  (context) =>
+                                                                      HomeScreen(
+                                                                bluetooth:
+                                                                    bluetooth,
+                                                                isNewUser:
+                                                                    false,
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: const SizedBox(
+                                                            height: 40,
+                                                            width: 140,
+                                                            child:
+                                                                Text("Home")),
+                                                      ),
+                                                    ]));
+                                      }
+                                    }
+                                  },
+                                  child: const Text("Start measurement"),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SmoothPageIndicator(
+                      controller: pageController,
+                      count: 3,
+                      effect: const WormEffect(
+                          activeDotColor: Colors
+                              .black), // or JumpingDotEffect, ExpandingDotsEffect etc.
+                    ),
+                  )
+                ],
               ),
             ),
           ],

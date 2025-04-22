@@ -66,16 +66,32 @@ class UserSelection extends StatelessWidget {
                       database.setCurrentUser(selectedUser);
                       int userCount = await database.getCurrentAmount();
                       print("Current user amount: $userCount");
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomeScreen(
-                            bluetooth: bluetooth,
-                            isNewUser: false,
+                      int? averageGsr =
+                          await database.getCurrentUserAverageGSR() ?? null;
+                      int? averageHeartRate =
+                          await database.getCurrentUserAverageHeartRate() ??
+                              null;
+                      if (averageGsr == null || averageHeartRate == null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(
+                              bluetooth: bluetooth,
+                              isNewUser: true,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(
+                              bluetooth: bluetooth,
+                              isNewUser: false,
+                            ),
+                          ),
+                        );
+                      }
                     } else {
                       showDialog(
                           context: context,
@@ -125,10 +141,6 @@ class UserSelection extends StatelessWidget {
                                             );
                                             database
                                                 .setCurrentUser(selectedUser);
-                                            int userCount = await database
-                                                .getCurrentAmount();
-                                            print(
-                                                "Current user amount: ${database.getCurrentUser()}");
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
