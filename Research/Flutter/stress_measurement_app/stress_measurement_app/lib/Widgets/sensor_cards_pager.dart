@@ -127,6 +127,7 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
           index: 3,
           child: BreathingSensorPage(
             bluetooth: widget.bluetooth,
+            repsirationRate: widget.sensorData.breathingRate,
           ))
     ];
 

@@ -264,6 +264,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                               const Spacer(),
                                             ],
                                           ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Container(
+                                            width: 100,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              color: Colors.blue,
+                                            ),
+                                            child: TextButton(
+                                              onPressed: () => {
+                                                bluetooth
+                                                    .startBreathingMeasurement(
+                                                        Provider.of<SensorData>(
+                                                            context,
+                                                            listen: false)),
+                                                Navigator.pop(context),
+                                              },
+                                              child: const Text(
+                                                "Respiration",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ],

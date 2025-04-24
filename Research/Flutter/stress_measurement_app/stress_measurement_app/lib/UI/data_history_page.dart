@@ -19,7 +19,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
   final TextEditingController endDateController = TextEditingController();
   late Future<List<Map<String, dynamic>>> dataFuture;
   bool isFilterActive = false;
-  @override
+
   Future<List<Map<String, dynamic>>> fetchData() {
     switch (widget.pageName) {
       case "Heart Rate":
@@ -33,6 +33,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     }
   }
 
+  @override
   void initState() {
     super.initState();
     dataFuture = fetchData();

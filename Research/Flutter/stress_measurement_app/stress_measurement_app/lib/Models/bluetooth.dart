@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stress_measurement_app/Models/database.dart';
@@ -157,7 +156,7 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = true;
           print("Measurement started");
           readData(sensorData);
-          notifyListeners();
+          notifyListeners(); // Stop the measurement after collecting data
         }
       }
     }
@@ -210,7 +209,6 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = false;
           newData = "HR"; // Set the newData variable to "HR"
           print("Measurement stopped");
-
           notifyListeners();
         }
       }
@@ -371,11 +369,12 @@ class Bluetooth with ChangeNotifier {
                     appDatabase.insertHeartRate(hr);
                     appDatabase.insertSpo2(spo2);
                     appDatabase.insertGSR(gsr);
+                    //appDatabase.insertBreathingRate(breathingRate);
                     break;
                 }
 
                 print(
-                    "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
+                    "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}, BreathingRate=${sensorData.breathingRate}");
               }
               // Increment received data count
               receivedDataCount++;

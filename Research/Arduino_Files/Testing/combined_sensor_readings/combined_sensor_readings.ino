@@ -117,6 +117,9 @@ void loop() {
     if (measuring) {
         readingsHeartRateSPO2Sensor();
         readingsGSRSensor();
+        breathingMeasurementStarted = true;
+        readingBreathSensor();
+        breathingMeasurementStarted = false;
         sendDataOverBluetooth();
     }
     if (measuringHeart){
@@ -166,17 +169,20 @@ void readingsHeartRateSPO2Sensor() {
         particleSensor.nextSample();
     }
     maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+    measuringHeart = false;
+    measuringSpo2 = false;
 }
 
 // GSR Sensor Readings
 void readingsGSRSensor() {
     long sum = 0;
     Serial.println("GSR measuring ...");
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 40; i++) {
         sum += analogRead(gsrPin);
         delay(5);
     }
-    gsrAverage = sum / 10;
+    gsrAverage = sum / 40;
+    measuringGSR = false;
 }
 
 void readingBreathSensor() {
@@ -191,4 +197,5 @@ void readingBreathSensor() {
 
     breathsPerMinute = 10;
   Serial.println("Measurement complete.");
+  measuringBreathing = false;
 }

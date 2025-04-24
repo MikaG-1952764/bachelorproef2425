@@ -5,9 +5,14 @@ import 'package:stress_measurement_app/Models/bluetooth.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
 
 class BreathingSensorPage extends StatelessWidget {
-  const BreathingSensorPage({super.key, required this.bluetooth});
+  const BreathingSensorPage({
+    super.key,
+    required this.bluetooth,
+    required this.repsirationRate,
+  });
 
   final Bluetooth bluetooth;
+  final int repsirationRate; // Example value, replace with actual data
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +51,7 @@ class BreathingSensorPage extends StatelessWidget {
               lineTouchData: const LineTouchData(enabled: false),
               lineBarsData: [
                 LineChartBarData(
-                  spots: generateBreathingGraph(10),
+                  spots: generateBreathingGraph(repsirationRate),
                   isCurved: true,
                   color: Colors.blue,
                   belowBarData: BarAreaData(show: false),
@@ -57,10 +62,10 @@ class BreathingSensorPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const Center(
+        Center(
           child: Text(
-            "Breathing Rate: \n 25 breaths/min",
-            style: TextStyle(
+            "Breathing Rate: \n $repsirationRate breaths/min",
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 18,
             ),
