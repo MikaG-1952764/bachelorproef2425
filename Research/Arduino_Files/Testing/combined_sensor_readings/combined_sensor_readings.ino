@@ -139,6 +139,7 @@ void loop() {
         readingBreathSensor();
         breathingMeasurementStarted = false;
     }
+    readingBreathSensor();
     delay(100);
 }
 
@@ -188,14 +189,41 @@ void readingsGSRSensor() {
 void readingBreathSensor() {
   unsigned long startTime = millis(); // get the current time
   unsigned long duration = 60000;     // 60 seconds in milliseconds
+  int lastVal = 0;
+  bool rising = false;
+  int breathCount = 0;
+
+  const int threshold = 30; // adjust this based on your sensor range
+  const int analogPin = A0; // make sure this matches your setup
 
   while (millis() - startTime < duration) {
     int val = analogRead(analogPin);  // read the input pin
-    Serial.println(val);              // print the value for debugging or plotting
-    delay(50);                        // small delay for readability
+
+    // Optional: basic smoothing
+    static int smoothed = 0;
+    smoothed = (smoothed * 3 + val) / 4;
+
+    if (smoothed > lastVal + threshold) {
+      rising = true;
+    }
+
+    if (rising && smoothed < lastVal - threshold) {
+      breathCount++;
+      rising = false;
+    }
+
+    lastVal = smoothed;
+
+    Serial.println(val); // For visualization/debug
+    delay(50);           // 20 Hz sampling
   }
 
-    breathsPerMinute = 10;
+  breathsPerMinute = breathCount;
+  Serial.print("Breaths per minute: ");
+  Serial.println(breathsPerMinute);
+
   Serial.println("Measurement complete.");
   measuringBreathing = false;
+  delay(10000);
 }
+
