@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     bluetooth.setDatabase(database);
     return ChangeNotifierProvider(
-      create: (_) => SensorData(heartRate: 0, spo2: 0, gsr: 0),
+      create: (_) =>
+          SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: UserSelection(

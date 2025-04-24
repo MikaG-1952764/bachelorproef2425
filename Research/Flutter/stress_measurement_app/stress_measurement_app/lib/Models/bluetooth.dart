@@ -118,9 +118,13 @@ class Bluetooth with ChangeNotifier {
                     int hr = int.tryParse(match.group(1)!) ?? 0;
                     int spo2 = int.tryParse(match.group(2)!) ?? 0;
                     int gsr = int.tryParse(match.group(3)!) ?? 0;
+                    int breathingRate = int.tryParse(match.group(4)!) ?? 0;
 
-                    SensorData sensorData =
-                        SensorData(heartRate: hr, spo2: spo2, gsr: gsr);
+                    SensorData sensorData = SensorData(
+                        heartRate: hr,
+                        spo2: spo2,
+                        gsr: gsr,
+                        breathingRate: breathingRate);
                     print(
                         "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
                   }
@@ -269,6 +273,34 @@ class Bluetooth with ChangeNotifier {
     print("START command characteristic not found");
   }
 
+  Future<void> startBreathingMeasurement(SensorData sensorData) async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          print("Sending START BREATHING command...");
+          await characteristic.write(utf8.encode("START BREATHING"),
+              withoutResponse: false);
+          isMeasuring = true;
+          newData = "Breathing"; // Set the newData variable to "HR"
+          print("Measurement started");
+          readData(
+            sensorData,
+          );
+          notifyListeners();
+        }
+      }
+    }
+    print("START command characteristic not found");
+  }
+
   int receivedDataCount = 0; // Counter to track received data
   final int maxReadings = 1; // Adjust this number based on your needs
 
@@ -298,10 +330,12 @@ class Bluetooth with ChangeNotifier {
 
               // Parse data if it follows "HR: X, SpO2: Y, GSR: Z"
               List<String> parts = receivedData.split(' ');
-              if (parts.length == 3) {
+              if (parts.length == 4) {
                 int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
                 int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
                 int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+                int breathingRate =
+                    int.tryParse(parts[3].split(':')[1].trim()) ?? 0;
 
                 // Update SensorData based on the new data type
                 switch (newData) {
@@ -325,9 +359,15 @@ class Bluetooth with ChangeNotifier {
                     appDatabase.insertGSR(gsr);
                     newData = "all"; // Reset to all after GSR measurement
                     break;
+                  case "Breathing":
+                    print("in case breathing");
+                    sensorData.setBreathingRateData(breathingRate);
+                    //appDatabase.insertBreathingRate(breathingRate);
+                    newData = "all"; // Reset to all after breathing measurement
+                    break;
                   default:
                     print("in case all");
-                    sensorData.setData(hr, spo2, gsr);
+                    sensorData.setData(hr, spo2, gsr, breathingRate);
                     appDatabase.insertHeartRate(hr);
                     appDatabase.insertSpo2(spo2);
                     appDatabase.insertGSR(gsr);
@@ -384,12 +424,14 @@ class Bluetooth with ChangeNotifier {
 
               // Parse data if it follows "HR: X, SpO2: Y, GSR: Z"
               List<String> parts = receivedData.split(' ');
-              if (parts.length == 3) {
+              if (parts.length == 4) {
                 int hr = int.tryParse(parts[0].split(':')[1].trim()) ?? 0;
                 int spo2 = int.tryParse(parts[1].split(':')[1].trim()) ?? 0;
                 int gsr = int.tryParse(parts[2].split(':')[1].trim()) ?? 0;
+                int breathingRate =
+                    int.tryParse(parts[3].split(':')[1].trim()) ?? 0;
 
-                sensorData.setData(hr, spo2, gsr);
+                sensorData.setData(hr, spo2, gsr, breathingRate);
 
                 print(
                     "Parsed SensorData: HR=${sensorData.heartRate}, SpO2=${sensorData.spo2}, GSR=${sensorData.gsr}");
@@ -422,7 +464,8 @@ class Bluetooth with ChangeNotifier {
       return 0;
     }
 
-    SensorData sensorData = SensorData(heartRate: 0, spo2: 0, gsr: 0);
+    SensorData sensorData =
+        SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0);
 
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
@@ -437,7 +480,7 @@ class Bluetooth with ChangeNotifier {
                 withoutResponse: false);
             print("Measurement started");
 
-            sensorData.setData(0, 0, 0);
+            sensorData.setData(0, 0, 0, 0);
             // Wait for the data to come back before proceeding
             SensorData data = await readSingleData(sensorData);
 
@@ -473,7 +516,8 @@ class Bluetooth with ChangeNotifier {
       return 0;
     }
 
-    SensorData sensorData = SensorData(heartRate: 0, spo2: 0, gsr: 0);
+    SensorData sensorData =
+        SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0);
 
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
@@ -488,7 +532,7 @@ class Bluetooth with ChangeNotifier {
                 withoutResponse: false); // Set the newData variable to "GSR"
             print("Measurement started");
 
-            sensorData.setData(0, 0, 0);
+            sensorData.setData(0, 0, 0, 0);
             // Wait for the data to come back before proceeding
             SensorData data = await readSingleData(sensorData);
 
