@@ -111,7 +111,7 @@ class Bluetooth with ChangeNotifier {
                   print("Received BLE Data: $receivedData");
 
                   RegExp regex = RegExp(
-                      r'HR:\s*([\d.]+), SpO2:\s*([\d.]+), GSR:\s*([\d.]+)');
+                      r'HR:\s*([\d.]+), SpO2:\s*([\d.]+), GSR:\s*([\d.]+), Breathing:\s*([\d.]+)');
                   var match = regex.firstMatch(receivedData);
 
                   if (match != null) {
