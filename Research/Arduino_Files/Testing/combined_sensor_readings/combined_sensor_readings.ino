@@ -137,9 +137,9 @@ void loop() {
     if(measuringBreathing && !breathingMeasurementStarted){
         breathingMeasurementStarted = true;
         readingBreathSensor();
+        sendDataOverBluetooth();
         breathingMeasurementStarted = false;
     }
-    readingBreathSensor();
     delay(100);
 }
 
@@ -193,7 +193,7 @@ void readingBreathSensor() {
   bool rising = false;
   int breathCount = 0;
 
-  const int threshold = 30; // adjust this based on your sensor range
+  const int threshold = 30 // -> might need to try threshold between 45-60 // adjust this based on your sensor range
   const int analogPin = A0; // make sure this matches your setup
 
   while (millis() - startTime < duration) {
