@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -280,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Consumer<SensorData>(builder: (context, sensorData, _) {
                   return Column(
                     children: [
-                      SizedBox(
+                      /*SizedBox(
                         width: 300,
                         height: 50,
                         child: FloatingActionButton(
@@ -296,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   "Average heart rate out of database: ${avgHeartRate}");
                               print("Average GSR out of database: ${avgGSR}");
                             }),
-                      ),
+                      ),*/
                       const SizedBox(height: 20),
                       SizedBox(
                         width: 300,

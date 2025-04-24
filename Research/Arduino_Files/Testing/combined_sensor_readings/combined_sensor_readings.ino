@@ -17,6 +17,10 @@ BLECharacteristic *pCommandCharacteristic = NULL;
 #define COMMAND_CHAR_UUID   "2A6F"  // For receiving start/stop commands
 
 const int gsrPin = A2;
+int analogPin = A0;             // BITalino EMG sensor connected to analog 
+              // outside leads to ground and +3.3V
+int val = 0;                    // variabe to store the value read
+
 bool measuring = false;
 bool measuringHeart = false;
 bool measuringSpo2 = false;
@@ -116,6 +120,7 @@ void loop() {
         readingsGSRSensor();
         sendDataOverBluetooth();
     }
+    readingBreathSensor();
     delay(100);
 }
 
@@ -157,4 +162,11 @@ void readingsGSRSensor() {
         delay(5);
     }
     gsrAverage = sum / 10;
+}
+
+void readingBreathSensor(){
+  val = analogRead(analogPin);  // read the input pin
+                                // RAW PZT signal
+  Serial.println(val);          // debug value
+  delay(50);               // to see the signal when using the “serial plotter”
 }
