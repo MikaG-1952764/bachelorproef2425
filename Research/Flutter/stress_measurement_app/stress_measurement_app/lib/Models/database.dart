@@ -168,10 +168,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> insertRespitoryRate(int measuredRespitoryRate) async {
-    return into(heartRate).insert(
-      HeartRateCompanion(
+    return into(respiratoryRate).insert(
+      RespiratoryRateCompanion(
         userId: Value(userId!),
-        heartRate: Value(measuredRespitoryRate),
+        respiratoryRate: Value(measuredRespitoryRate),
         createdAt: Value(DateTime.now()),
       ),
     );
@@ -193,7 +193,7 @@ class AppDatabase extends _$AppDatabase {
         'date': row.createdAt
             .toString()
             .split(' ')[0], // Extract only the date part
-        'heartRate': row.respiratoryRate,
+        'respiratoryRate': row.respiratoryRate,
       };
     }).get();
 
@@ -433,7 +433,7 @@ class AppDatabase extends _$AppDatabase {
         'date': row.createdAt
             .toString()
             .split(' ')[0], // Extract only the date part
-        'heartRate': row.respiratoryRate,
+        'respiratoryRate': row.respiratoryRate,
       };
     }).get();
 

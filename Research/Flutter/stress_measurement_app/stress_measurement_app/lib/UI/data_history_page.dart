@@ -363,7 +363,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "Spo2":
         return "${reading['spo2']} ms";
       case "RespitoryRate":
-        return "${reading['respitoryRate']} breaths/min"; // Example unit for spo2
+        return "${reading['respiratoryRate']} breaths/min"; // Example unit for spo2
       default:
         return "Unknown";
     }

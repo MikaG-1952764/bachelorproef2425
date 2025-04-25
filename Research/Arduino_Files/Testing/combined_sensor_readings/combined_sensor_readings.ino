@@ -193,7 +193,7 @@ void readingBreathSensor() {
   bool rising = false;
   int breathCount = 0;
 
-  const int threshold = 30 // -> might need to try threshold between 45-60 // adjust this based on your sensor range
+  const int threshold = 30; // -> might need to try threshold between 45-60 // adjust this based on your sensor range
   const int analogPin = A0; // make sure this matches your setup
 
   while (millis() - startTime < duration) {
@@ -224,6 +224,6 @@ void readingBreathSensor() {
 
   Serial.println("Measurement complete.");
   measuringBreathing = false;
-  delay(10000);
+  delay(50);
 }
 
