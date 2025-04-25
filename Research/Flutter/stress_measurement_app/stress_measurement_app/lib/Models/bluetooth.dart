@@ -360,7 +360,7 @@ class Bluetooth with ChangeNotifier {
                   case "Breathing":
                     print("in case breathing");
                     sensorData.setBreathingRateData(breathingRate);
-                    //appDatabase.insertBreathingRate(breathingRate);
+                    appDatabase.insertRespitoryRate(breathingRate);
                     newData = "all"; // Reset to all after breathing measurement
                     break;
                   default:
@@ -369,7 +369,7 @@ class Bluetooth with ChangeNotifier {
                     appDatabase.insertHeartRate(hr);
                     appDatabase.insertSpo2(spo2);
                     appDatabase.insertGSR(gsr);
-                    //appDatabase.insertBreathingRate(breathingRate);
+                    appDatabase.insertRespitoryRate(breathingRate);
                     break;
                 }
 

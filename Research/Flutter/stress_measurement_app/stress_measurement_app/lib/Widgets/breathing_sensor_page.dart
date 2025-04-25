@@ -86,7 +86,7 @@ class BreathingSensorPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => DataHistoryPage(
-                              pageName: "Spo2",
+                              pageName: "RespitoryRate",
                               bluetooth: bluetooth,
                             )));
               }),

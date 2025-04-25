@@ -28,6 +28,10 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
         return widget.bluetooth.getDatabase().getLatestGSRReadings(10);
       case "Spo2":
         return widget.bluetooth.getDatabase().getLatestSpo2Readings(10);
+      case "RespitoryRate":
+        return widget.bluetooth
+            .getDatabase()
+            .getLatestRespitoryRateReadings(10);
       default:
         return Future.value([]);
     }
@@ -55,6 +59,10 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
           return widget.bluetooth
               .getDatabase()
               .getSpo2ReadingsInRange(startDate, endDate);
+        case "RespitoryRate":
+          return widget.bluetooth
+              .getDatabase()
+              .getRespitoryRateReadingsInRange(startDate, endDate);
         default:
           return Future.value([]);
       }
@@ -107,7 +115,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                 context: context,
                                 initialDate: DateTime.now(),
                                 firstDate: DateTime(2020),
-                                lastDate: DateTime(2101),
+                                lastDate: DateTime.now(),
                               ).then((pickedDate) {
                                 if (pickedDate != null) {
                                   final formattedDate = DateFormat('dd/MM/yyyy')
@@ -130,7 +138,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                 context: context,
                                 initialDate: DateTime.now(),
                                 firstDate: DateTime(2020),
-                                lastDate: DateTime(2101),
+                                lastDate: DateTime.now(),
                               ).then((pickedDate) {
                                 if (pickedDate != null) {
                                   final formattedDate = DateFormat('dd/MM/yyyy')
@@ -353,7 +361,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return "${reading['gsr']} µS"; // Example unit for GSR
       case "Spo2":
-        return "${reading['spo2']} ms"; // Example unit for spo2
+        return "${reading['spo2']} ms";
+      case "RespitoryRate":
+        return "${reading['respitoryRate']} breaths/mine"; // Example unit for spo2
       default:
         return "Unknown";
     }

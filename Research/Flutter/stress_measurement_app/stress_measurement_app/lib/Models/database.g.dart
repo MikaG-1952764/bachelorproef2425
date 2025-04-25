@@ -1411,6 +1411,277 @@ class StressLevelCompanion extends UpdateCompanion<StressLevelData> {
   }
 }
 
+class $RespiratoryRateTable extends RespiratoryRate
+    with TableInfo<$RespiratoryRateTable, RespiratoryRateData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RespiratoryRateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES users (id)'));
+  static const VerificationMeta _respiratoryRateMeta =
+      const VerificationMeta('respiratoryRate');
+  @override
+  late final GeneratedColumn<int> respiratoryRate = GeneratedColumn<int>(
+      'respiratory_rate', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, userId, respiratoryRate, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'respiratory_rate';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<RespiratoryRateData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('respiratory_rate')) {
+      context.handle(
+          _respiratoryRateMeta,
+          respiratoryRate.isAcceptableOrUnknown(
+              data['respiratory_rate']!, _respiratoryRateMeta));
+    } else if (isInserting) {
+      context.missing(_respiratoryRateMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RespiratoryRateData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RespiratoryRateData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}user_id'])!,
+      respiratoryRate: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}respiratory_rate'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
+    );
+  }
+
+  @override
+  $RespiratoryRateTable createAlias(String alias) {
+    return $RespiratoryRateTable(attachedDatabase, alias);
+  }
+}
+
+class RespiratoryRateData extends DataClass
+    implements Insertable<RespiratoryRateData> {
+  final int id;
+  final int userId;
+  final int respiratoryRate;
+  final DateTime? createdAt;
+  const RespiratoryRateData(
+      {required this.id,
+      required this.userId,
+      required this.respiratoryRate,
+      this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['user_id'] = Variable<int>(userId);
+    map['respiratory_rate'] = Variable<int>(respiratoryRate);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    return map;
+  }
+
+  RespiratoryRateCompanion toCompanion(bool nullToAbsent) {
+    return RespiratoryRateCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      respiratoryRate: Value(respiratoryRate),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+    );
+  }
+
+  factory RespiratoryRateData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RespiratoryRateData(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<int>(json['userId']),
+      respiratoryRate: serializer.fromJson<int>(json['respiratoryRate']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<int>(userId),
+      'respiratoryRate': serializer.toJson<int>(respiratoryRate),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+    };
+  }
+
+  RespiratoryRateData copyWith(
+          {int? id,
+          int? userId,
+          int? respiratoryRate,
+          Value<DateTime?> createdAt = const Value.absent()}) =>
+      RespiratoryRateData(
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        respiratoryRate: respiratoryRate ?? this.respiratoryRate,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+      );
+  RespiratoryRateData copyWithCompanion(RespiratoryRateCompanion data) {
+    return RespiratoryRateData(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      respiratoryRate: data.respiratoryRate.present
+          ? data.respiratoryRate.value
+          : this.respiratoryRate,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RespiratoryRateData(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('respiratoryRate: $respiratoryRate, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, userId, respiratoryRate, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RespiratoryRateData &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.respiratoryRate == this.respiratoryRate &&
+          other.createdAt == this.createdAt);
+}
+
+class RespiratoryRateCompanion extends UpdateCompanion<RespiratoryRateData> {
+  final Value<int> id;
+  final Value<int> userId;
+  final Value<int> respiratoryRate;
+  final Value<DateTime?> createdAt;
+  const RespiratoryRateCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.respiratoryRate = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  RespiratoryRateCompanion.insert({
+    this.id = const Value.absent(),
+    required int userId,
+    required int respiratoryRate,
+    this.createdAt = const Value.absent(),
+  })  : userId = Value(userId),
+        respiratoryRate = Value(respiratoryRate);
+  static Insertable<RespiratoryRateData> custom({
+    Expression<int>? id,
+    Expression<int>? userId,
+    Expression<int>? respiratoryRate,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (respiratoryRate != null) 'respiratory_rate': respiratoryRate,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  RespiratoryRateCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? userId,
+      Value<int>? respiratoryRate,
+      Value<DateTime?>? createdAt}) {
+    return RespiratoryRateCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      respiratoryRate: respiratoryRate ?? this.respiratoryRate,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (respiratoryRate.present) {
+      map['respiratory_rate'] = Variable<int>(respiratoryRate.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RespiratoryRateCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('respiratoryRate: $respiratoryRate, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1419,12 +1690,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GSRTable gsr = $GSRTable(this);
   late final $SPO2Table spo2 = $SPO2Table(this);
   late final $StressLevelTable stressLevel = $StressLevelTable(this);
+  late final $RespiratoryRateTable respiratoryRate =
+      $RespiratoryRateTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, heartRate, gsr, spo2, stressLevel];
+      [users, heartRate, gsr, spo2, stressLevel, respiratoryRate];
 }
 
 typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
@@ -1500,6 +1773,23 @@ final class $$UsersTableReferences
         .filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_stressLevelRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$RespiratoryRateTable, List<RespiratoryRateData>>
+      _respiratoryRateRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.respiratoryRate,
+              aliasName:
+                  $_aliasNameGenerator(db.users.id, db.respiratoryRate.userId));
+
+  $$RespiratoryRateTableProcessedTableManager get respiratoryRateRefs {
+    final manager =
+        $$RespiratoryRateTableTableManager($_db, $_db.respiratoryRate)
+            .filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_respiratoryRateRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -1608,6 +1898,27 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
             $$StressLevelTableFilterComposer(
               $db: $db,
               $table: $db.stressLevel,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> respiratoryRateRefs(
+      Expression<bool> Function($$RespiratoryRateTableFilterComposer f) f) {
+    final $$RespiratoryRateTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.respiratoryRate,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RespiratoryRateTableFilterComposer(
+              $db: $db,
+              $table: $db.respiratoryRate,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1757,6 +2068,27 @@ class $$UsersTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> respiratoryRateRefs<T extends Object>(
+      Expression<T> Function($$RespiratoryRateTableAnnotationComposer a) f) {
+    final $$RespiratoryRateTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.respiratoryRate,
+        getReferencedColumn: (t) => t.userId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$RespiratoryRateTableAnnotationComposer(
+              $db: $db,
+              $table: $db.respiratoryRate,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager extends RootTableManager<
@@ -1774,7 +2106,8 @@ class $$UsersTableTableManager extends RootTableManager<
         {bool heartRateRefs,
         bool gsrRefs,
         bool spo2Refs,
-        bool stressLevelRefs})> {
+        bool stressLevelRefs,
+        bool respiratoryRateRefs})> {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
       : super(TableManagerState(
           db: db,
@@ -1825,14 +2158,16 @@ class $$UsersTableTableManager extends RootTableManager<
               {heartRateRefs = false,
               gsrRefs = false,
               spo2Refs = false,
-              stressLevelRefs = false}) {
+              stressLevelRefs = false,
+              respiratoryRateRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (heartRateRefs) db.heartRate,
                 if (gsrRefs) db.gsr,
                 if (spo2Refs) db.spo2,
-                if (stressLevelRefs) db.stressLevel
+                if (stressLevelRefs) db.stressLevel,
+                if (respiratoryRateRefs) db.respiratoryRate
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -1882,6 +2217,19 @@ class $$UsersTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.userId == item.id),
+                        typedResults: items),
+                  if (respiratoryRateRefs)
+                    await $_getPrefetchedData<User, $UsersTable,
+                            RespiratoryRateData>(
+                        currentTable: table,
+                        referencedTable: $$UsersTableReferences
+                            ._respiratoryRateRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$UsersTableReferences(db, table, p0)
+                                .respiratoryRateRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.userId == item.id),
                         typedResults: items)
                 ];
               },
@@ -1905,7 +2253,8 @@ typedef $$UsersTableProcessedTableManager = ProcessedTableManager<
         {bool heartRateRefs,
         bool gsrRefs,
         bool spo2Refs,
-        bool stressLevelRefs})>;
+        bool stressLevelRefs,
+        bool respiratoryRateRefs})>;
 typedef $$HeartRateTableCreateCompanionBuilder = HeartRateCompanion Function({
   Value<int> id,
   required int userId,
@@ -2899,6 +3248,263 @@ typedef $$StressLevelTableProcessedTableManager = ProcessedTableManager<
     (StressLevelData, $$StressLevelTableReferences),
     StressLevelData,
     PrefetchHooks Function({bool userId})>;
+typedef $$RespiratoryRateTableCreateCompanionBuilder = RespiratoryRateCompanion
+    Function({
+  Value<int> id,
+  required int userId,
+  required int respiratoryRate,
+  Value<DateTime?> createdAt,
+});
+typedef $$RespiratoryRateTableUpdateCompanionBuilder = RespiratoryRateCompanion
+    Function({
+  Value<int> id,
+  Value<int> userId,
+  Value<int> respiratoryRate,
+  Value<DateTime?> createdAt,
+});
+
+final class $$RespiratoryRateTableReferences extends BaseReferences<
+    _$AppDatabase, $RespiratoryRateTable, RespiratoryRateData> {
+  $$RespiratoryRateTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
+      $_aliasNameGenerator(db.respiratoryRate.userId, db.users.id));
+
+  $$UsersTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<int>('user_id')!;
+
+    final manager = $$UsersTableTableManager($_db, $_db.users)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$RespiratoryRateTableFilterComposer
+    extends Composer<_$AppDatabase, $RespiratoryRateTable> {
+  $$RespiratoryRateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get respiratoryRate => $composableBuilder(
+      column: $table.respiratoryRate,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableFilterComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RespiratoryRateTableOrderingComposer
+    extends Composer<_$AppDatabase, $RespiratoryRateTable> {
+  $$RespiratoryRateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get respiratoryRate => $composableBuilder(
+      column: $table.respiratoryRate,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableOrderingComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RespiratoryRateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RespiratoryRateTable> {
+  $$RespiratoryRateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get respiratoryRate => $composableBuilder(
+      column: $table.respiratoryRate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.userId,
+        referencedTable: $db.users,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$UsersTableAnnotationComposer(
+              $db: $db,
+              $table: $db.users,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$RespiratoryRateTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $RespiratoryRateTable,
+    RespiratoryRateData,
+    $$RespiratoryRateTableFilterComposer,
+    $$RespiratoryRateTableOrderingComposer,
+    $$RespiratoryRateTableAnnotationComposer,
+    $$RespiratoryRateTableCreateCompanionBuilder,
+    $$RespiratoryRateTableUpdateCompanionBuilder,
+    (RespiratoryRateData, $$RespiratoryRateTableReferences),
+    RespiratoryRateData,
+    PrefetchHooks Function({bool userId})> {
+  $$RespiratoryRateTableTableManager(
+      _$AppDatabase db, $RespiratoryRateTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RespiratoryRateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RespiratoryRateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RespiratoryRateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> userId = const Value.absent(),
+            Value<int> respiratoryRate = const Value.absent(),
+            Value<DateTime?> createdAt = const Value.absent(),
+          }) =>
+              RespiratoryRateCompanion(
+            id: id,
+            userId: userId,
+            respiratoryRate: respiratoryRate,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int userId,
+            required int respiratoryRate,
+            Value<DateTime?> createdAt = const Value.absent(),
+          }) =>
+              RespiratoryRateCompanion.insert(
+            id: id,
+            userId: userId,
+            respiratoryRate: respiratoryRate,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$RespiratoryRateTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (userId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.userId,
+                    referencedTable:
+                        $$RespiratoryRateTableReferences._userIdTable(db),
+                    referencedColumn:
+                        $$RespiratoryRateTableReferences._userIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$RespiratoryRateTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $RespiratoryRateTable,
+    RespiratoryRateData,
+    $$RespiratoryRateTableFilterComposer,
+    $$RespiratoryRateTableOrderingComposer,
+    $$RespiratoryRateTableAnnotationComposer,
+    $$RespiratoryRateTableCreateCompanionBuilder,
+    $$RespiratoryRateTableUpdateCompanionBuilder,
+    (RespiratoryRateData, $$RespiratoryRateTableReferences),
+    RespiratoryRateData,
+    PrefetchHooks Function({bool userId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2911,4 +3517,6 @@ class $AppDatabaseManager {
   $$SPO2TableTableManager get spo2 => $$SPO2TableTableManager(_db, _db.spo2);
   $$StressLevelTableTableManager get stressLevel =>
       $$StressLevelTableTableManager(_db, _db.stressLevel);
+  $$RespiratoryRateTableTableManager get respiratoryRate =>
+      $$RespiratoryRateTableTableManager(_db, _db.respiratoryRate);
 }
