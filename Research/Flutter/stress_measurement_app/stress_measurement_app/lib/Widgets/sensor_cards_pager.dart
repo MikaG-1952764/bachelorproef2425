@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Widgets/breathing_sensor_page.dart';
 import '../Models/sensor_data.dart';
 import '../Models/bluetooth.dart';
 import 'heart_rate_gauge.dart';
@@ -122,6 +123,12 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
           ],
         ),
       ),
+      _buildCard(
+          index: 3,
+          child: BreathingSensorPage(
+            bluetooth: widget.bluetooth,
+            repsirationRate: widget.sensorData.breathingRate,
+          ))
     ];
 
     return SizedBox(

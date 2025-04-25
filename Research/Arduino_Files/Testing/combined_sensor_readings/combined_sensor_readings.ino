@@ -25,6 +25,8 @@ bool measuring = false;
 bool measuringHeart = false;
 bool measuringSpo2 = false;
 bool measuringGSR = false;
+bool measuringBreathing = false;
+bool breathingMeasurementStarted = false;
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 uint16_t irBuffer[100], redBuffer[100];
@@ -35,6 +37,7 @@ uint32_t irBuffer[100], redBuffer[100];
 int32_t bufferLength, spo2, heartRate;
 int8_t validSPO2, validHeartRate;
 int gsrAverage = 0;
+int breathsPerMinute = 0;
 
 // BLE Server Callback (to detect app connection)
 class MyServerCallbacks : public BLEServerCallbacks {
@@ -46,7 +49,8 @@ class MyServerCallbacks : public BLEServerCallbacks {
         measuring = false;
         measuringHeart = false;
         measuringSpo2 = false;
-        measuringGSR = false;// Stop measuring if app disconnects
+        measuringGSR = false;
+        measuringBreathing = false;// Stop measuring if app disconnects
     }
 };
 
@@ -58,22 +62,26 @@ class MyCommandCallbacks : public BLECharacteristicCallbacks {
             measuring = true;
             Serial.println("Measurement Started!");
         } else if (command == "START HEART"){
-          measuringHeart = true;
-          Serial.println("Heart measurement Started!");
+            measuringHeart = true;
+            Serial.println("Heart measurement Started!");
         }
         else if (command == "START SPO2"){
-          measuringSpo2 = true;
-          Serial.println("SPO2 measurement Started!");
+            measuringSpo2 = true;
+            Serial.println("SPO2 measurement Started!");
         }
         else if (command == "START GSR"){
-          measuringGSR = true;
-          Serial.println("GSR measurement Started!");
+            measuringGSR = true;
+            Serial.println("GSR measurement Started!");
+        } else if (command == "START BREATHING"){
+            measuringBreathing = true;
+            Serial.println("Breathing measurement Started!");
         }
         else if (command == "STOP") {
             measuring = false;
             measuringHeart = false;
             measuringSpo2 = false;
             measuringGSR = false;
+            measuringBreathing = false;
             Serial.println("Measurement Stopped!");
         }
     }
@@ -109,23 +117,34 @@ void loop() {
     if (measuring) {
         readingsHeartRateSPO2Sensor();
         readingsGSRSensor();
+        breathingMeasurementStarted = true;
+        readingBreathSensor();
+        breathingMeasurementStarted = false;
         sendDataOverBluetooth();
-    } else if (measuringHeart){
+    }
+    if (measuringHeart){
         readingsHeartRateSPO2Sensor();
         sendDataOverBluetooth();
-    } else if (measuringSpo2){
+    } 
+    if (measuringSpo2){
         readingsHeartRateSPO2Sensor();
         sendDataOverBluetooth();
-    } else if (measuringGSR){
+    } 
+    if (measuringGSR){
         readingsGSRSensor();
         sendDataOverBluetooth();
     }
-    readingBreathSensor();
+    if(measuringBreathing && !breathingMeasurementStarted){
+        breathingMeasurementStarted = true;
+        readingBreathSensor();
+        sendDataOverBluetooth();
+        breathingMeasurementStarted = false;
+    }
     delay(100);
 }
 
 void sendDataOverBluetooth() {
-    String data = "HR:" + String(heartRate) + " SpO2:" + String(spo2) + " GSR:" + String(gsrAverage);
+    String data = "HR:" + String(heartRate) + " SpO2:" + String(spo2) + " GSR:" + String(gsrAverage) + " Breathing:" + String(breathsPerMinute);
     Serial.println(data);  // Print data to the serial monitor for debugging
     pDataCharacteristic->setValue(data.c_str());
     pDataCharacteristic->notify();
@@ -151,22 +170,60 @@ void readingsHeartRateSPO2Sensor() {
         particleSensor.nextSample();
     }
     maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+    measuringHeart = false;
+    measuringSpo2 = false;
 }
 
 // GSR Sensor Readings
 void readingsGSRSensor() {
     long sum = 0;
     Serial.println("GSR measuring ...");
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 40; i++) {
         sum += analogRead(gsrPin);
         delay(5);
     }
-    gsrAverage = sum / 10;
+    gsrAverage = sum / 40;
+    measuringGSR = false;
 }
 
-void readingBreathSensor(){
-  val = analogRead(analogPin);  // read the input pin
-                                // RAW PZT signal
-  Serial.println(val);          // debug value
-  delay(50);               // to see the signal when using the “serial plotter”
+void readingBreathSensor() {
+  unsigned long startTime = millis(); // get the current time
+  unsigned long duration = 60000;     // 60 seconds in milliseconds
+  int lastVal = 0;
+  bool rising = false;
+  int breathCount = 0;
+
+  const int threshold = 30; // -> might need to try threshold between 45-60 // adjust this based on your sensor range
+  const int analogPin = A0; // make sure this matches your setup
+
+  while (millis() - startTime < duration) {
+    int val = analogRead(analogPin);  // read the input pin
+
+    // Optional: basic smoothing
+    static int smoothed = 0;
+    smoothed = (smoothed * 3 + val) / 4;
+
+    if (smoothed > lastVal + threshold) {
+      rising = true;
+    }
+
+    if (rising && smoothed < lastVal - threshold) {
+      breathCount++;
+      rising = false;
+    }
+
+    lastVal = smoothed;
+
+    Serial.println(val); // For visualization/debug
+    delay(50);           // 20 Hz sampling
+  }
+
+  breathsPerMinute = breathCount;
+  Serial.print("Breaths per minute: ");
+  Serial.println(breathsPerMinute);
+
+  Serial.println("Measurement complete.");
+  measuringBreathing = false;
+  delay(50);
 }
+

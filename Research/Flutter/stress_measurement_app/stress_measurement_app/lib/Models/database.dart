@@ -46,7 +46,15 @@ class StressLevel extends Table {
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
-@DriftDatabase(tables: [Users, HeartRate, GSR, SPO2, StressLevel])
+class RespiratoryRate extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get userId => integer().references(Users, #id)();
+  IntColumn get respiratoryRate => integer()();
+  DateTimeColumn get createdAt => dateTime().nullable()();
+}
+
+@DriftDatabase(
+    tables: [Users, HeartRate, GSR, SPO2, StressLevel, RespiratoryRate])
 class AppDatabase extends _$AppDatabase {
   Future<void> setCurrentUser(String username) async {
     userName = username;
@@ -157,6 +165,39 @@ class AppDatabase extends _$AppDatabase {
         createdAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<int> insertRespitoryRate(int measuredRespitoryRate) async {
+    return into(respiratoryRate).insert(
+      RespiratoryRateCompanion(
+        userId: Value(userId!),
+        respiratoryRate: Value(measuredRespitoryRate),
+        createdAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getLatestRespitoryRateReadings(
+      int limit) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(respiratoryRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+      ..limit(limit));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'respiratoryRate': row.respiratoryRate,
+      };
+    }).get();
+
+    return results;
   }
 
   Future<int> getHeartRateCount() async {
@@ -370,6 +411,29 @@ class AppDatabase extends _$AppDatabase {
             .toString()
             .split(' ')[0], // Extract only the date part
         'spo2': row.spo2,
+      };
+    }).get();
+
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> getRespitoryRateReadingsInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(respiratoryRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'respiratoryRate': row.respiratoryRate,
       };
     }).get();
 
