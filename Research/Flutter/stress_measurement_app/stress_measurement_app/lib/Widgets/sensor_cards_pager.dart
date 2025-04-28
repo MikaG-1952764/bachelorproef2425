@@ -86,12 +86,23 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                     const SizedBox(width: 10),
                     const Text('Heart Rate',
                         style: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold)),
+                            fontSize: 24, fontWeight: FontWeight.bold)),
                     const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.settings),
-                      onPressed: widget.onHeartConfig,
+                    SizedBox(
+                      width: 38,
+                      child: IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: widget.onHeartConfig,
+                      ),
                     ),
+                    const SizedBox(width: 4),
+                    SizedBox(
+                      width: 38,
+                      child: IconButton(
+                          onPressed: () {},
+                          icon: const Icon(Icons.info_outline)),
+                    ),
+                    //const SizedBox(width: 22),
                   ],
                 ),
                 Expanded(

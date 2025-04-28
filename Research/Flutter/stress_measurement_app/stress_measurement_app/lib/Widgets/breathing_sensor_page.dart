@@ -33,11 +33,17 @@ class BreathingSensorPage extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 10),
-        const Text("Respiration Rate",
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 24,
-                fontWeight: FontWeight.bold)),
+        Row(
+          children: [
+            const Text("Respiration Rate",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold)),
+            const Spacer(),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.info_outline))
+          ],
+        ),
         const SizedBox(height: 50),
         SizedBox(
           height: 200, // or whatever size you want
