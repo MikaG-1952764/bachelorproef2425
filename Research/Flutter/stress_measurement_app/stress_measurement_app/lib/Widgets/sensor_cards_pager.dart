@@ -106,13 +106,77 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                               context: context,
                               builder: (BuildContext context) => AlertDialog(
                                 title: const Text("Heart rate zones"),
-                                content: Text(
-                                    "Your heart rate and spo2 (blood-oxygen level) is measured by a sensor with LEDs and a photosensor. The reflected light is measured by the photosensor, which in turn can be used to determine the heart rate and spo2.\n\nThe heart rate zones are as follows:\n\n"
-                                    "1. Very Light: 0 - ${(maxHeartRate! * 0.57).round()} bpm\n\n"
-                                    "2. Light: ${(maxHeartRate! * 0.57).round()} - ${(maxHeartRate! * 0.63).round()} bpm\n\n"
-                                    "3. Moderate: ${(maxHeartRate! * 0.63).round()} - ${(maxHeartRate! * 0.76).round()} bpm\n\n"
-                                    "4. Vigorous (elevated): ${(maxHeartRate! * 0.76).round()} - ${(maxHeartRate! * 0.95).round()} bpm\n\n"
-                                    "4. Maximal: ${(maxHeartRate! * 0.95).round()} - $maxHeartRate bpm"),
+                                content: SizedBox(
+                                  height: 362,
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                          "Your heart rate and spo2 (blood-oxygen level) is measured by a sensor with LEDs and a photosensor. The reflected light is measured by the photosensor, which in turn can be used to determine the heart rate and spo2.\n\nThe heart rate zones are as follows:\n\n"),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 0, 255, 9),
+                                          ),
+                                          Text(
+                                              " Very Light: 0 - ${(maxHeartRate! * 0.57).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 0, 158, 6),
+                                          ),
+                                          Text(
+                                              " Light: ${(maxHeartRate! * 0.57).round()} - ${(maxHeartRate! * 0.63).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 255, 251, 0),
+                                          ),
+                                          Text(
+                                              " Moderate: ${(maxHeartRate! * 0.63).round()} - ${(maxHeartRate! * 0.76).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: Colors.orange,
+                                          ),
+                                          Text(
+                                              " Elevated: ${(maxHeartRate! * 0.76).round()} - ${(maxHeartRate! * 0.95).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: Colors.red,
+                                          ),
+                                          Text(
+                                              " Maximal: ${(maxHeartRate! * 0.95).round()} - $maxHeartRate bpm")
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 actions: [
                                   TextButton(
                                     child: const Text("OK"),
