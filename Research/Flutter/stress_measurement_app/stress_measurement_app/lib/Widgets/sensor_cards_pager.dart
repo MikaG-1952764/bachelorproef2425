@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Widgets/breathing_sensor_page.dart';
 import '../Models/sensor_data.dart';
 import '../Models/bluetooth.dart';
@@ -36,9 +37,12 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
   final PageController _controller = PageController(viewportFraction: 0.75);
   double _currentPage = 0;
 
+  late AppDatabase database;
+
   @override
   void initState() {
     super.initState();
+    database = widget.bluetooth.getDatabase();
     _controller.addListener(() {
       setState(() {
         _currentPage = _controller.page!;
@@ -46,89 +50,234 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
     });
   }
 
+  Future<int> latestHeartRate() async {
+    final readings = await database.getLatestHeartRateReadings(1);
+    return readings.isNotEmpty ? readings.first['heartRate'] : 0;
+  }
+
+  Future<int> latestSpo2() async {
+    final readings = await database.getLatestSpo2Readings(1);
+    return readings.isNotEmpty ? readings.first['spo2'] : 0;
+  }
+
+  Future<int> latestGSR() async {
+    final readings = await database.getLatestGSRReadings(1);
+    return readings.isNotEmpty ? readings.first['gsr'] : 0;
+  }
+
+  Future<int> latestRespiratoryRate() async {
+    final readings = await database.getLatestRespitoryRateReadings(1);
+    return readings.isNotEmpty ? readings.first['respiratoryRate'] : 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _buildCard(
-        index: 0,
-        child: Column(
-          children: [
-            Row(
+      FutureBuilder<int>(
+        future: latestHeartRate(),
+        builder: (context, snapshot) {
+          final heartRate = snapshot.data ?? widget.sensorData.heartRate;
+          return _buildCard(
+            index: 0,
+            child: Column(
               children: [
-                const SizedBox(width: 10),
-                const Text('Heart Rate',
-                    style:
-                        TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: widget.onHeartConfig,
+                Row(
+                  children: [
+                    const SizedBox(width: 10),
+                    const Text('Heart Rate',
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    SizedBox(
+                      width: 38,
+                      child: IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: widget.onHeartConfig,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    SizedBox(
+                      width: 38,
+                      child: IconButton(
+                          onPressed: () async {
+                            final maxHeartRate =
+                                await database.getCurrentUserMaxHeartRate();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: const Text("Heart rate zones"),
+                                content: SizedBox(
+                                  height: 362,
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                          "Your heart rate and spo2 (blood-oxygen level) is measured by a sensor with LEDs and a photosensor. The reflected light is measured by the photosensor, which in turn can be used to determine the heart rate and spo2.\n\nThe heart rate zones are as follows:\n\n"),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 0, 255, 9),
+                                          ),
+                                          Text(
+                                              " Very Light: 0 - ${(maxHeartRate! * 0.57).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 0, 158, 6),
+                                          ),
+                                          Text(
+                                              " Light: ${(maxHeartRate! * 0.57).round()} - ${(maxHeartRate! * 0.63).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: const Color.fromARGB(
+                                                255, 255, 251, 0),
+                                          ),
+                                          Text(
+                                              " Moderate: ${(maxHeartRate! * 0.63).round()} - ${(maxHeartRate! * 0.76).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: Colors.orange,
+                                          ),
+                                          Text(
+                                              " Elevated: ${(maxHeartRate! * 0.76).round()} - ${(maxHeartRate! * 0.95).round()} bpm")
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            color: Colors.red,
+                                          ),
+                                          Text(
+                                              " Maximal: ${(maxHeartRate! * 0.95).round()} - $maxHeartRate bpm")
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("OK"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.info_outline)),
+                    ),
+                    //const SizedBox(width: 22),
+                  ],
                 ),
-              ],
-            ),
-            Expanded(
-              child:
-                  widget.minHeartValue != -1.0 && widget.maxHeartValue != -1.0
+                Expanded(
+                  child: widget.minHeartValue != -1.0 &&
+                          widget.maxHeartValue != -1.0
                       ? HeartRateGauge(
-                          heartRate: widget.sensorData.heartRate,
+                          heartRate: heartRate,
                           minValue: widget.minHeartValue,
                           maxValue: widget.maxHeartValue,
                           bluetooth: widget.bluetooth,
                         )
                       : HeartRateGauge(
-                          heartRate: widget.sensorData.heartRate,
+                          heartRate: heartRate,
                           bluetooth: widget.bluetooth,
                         ),
-            ),
-          ],
-        ),
-      ),
-      _buildCard(
-        index: 1,
-        child: Spo2ProgressBar(
-          widget.sensorData.spo2,
-          bluetooth: widget.bluetooth,
-        ),
-      ),
-      _buildCard(
-        index: 2,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const SizedBox(width: 10),
-                const Text('GSR',
-                    style:
-                        TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: widget.onGSRConfig,
                 ),
               ],
             ),
-            Expanded(
-              child: widget.minGSRValue != -1.0 && widget.maxGSRValue != -1.0
-                  ? GsrLineChart(
-                      gsr: widget.sensorData.gsr,
-                      minValue: widget.minGSRValue,
-                      maxValue: widget.maxGSRValue,
-                      bluetooth: widget.bluetooth,
-                    )
-                  : GsrLineChart(
-                      gsr: widget.sensorData.gsr,
-                      bluetooth: widget.bluetooth,
-                    ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
-      _buildCard(
-          index: 3,
-          child: BreathingSensorPage(
-            bluetooth: widget.bluetooth,
-            repsirationRate: widget.sensorData.breathingRate,
-          ))
+      FutureBuilder<int>(
+        future: latestSpo2(),
+        builder: (context, snapshot) {
+          final spo2 = snapshot.data ?? widget.sensorData.spo2;
+          return _buildCard(
+            index: 1,
+            child: Spo2ProgressBar(
+              spo2,
+              bluetooth: widget.bluetooth,
+            ),
+          );
+        },
+      ),
+      FutureBuilder<int>(
+        future: latestGSR(),
+        builder: (context, snapshot) {
+          final gsr = snapshot.data ?? widget.sensorData.gsr;
+          return _buildCard(
+            index: 2,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: 10),
+                    const Text('GSR',
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      onPressed: widget.onGSRConfig,
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child:
+                      widget.minGSRValue != -1.0 && widget.maxGSRValue != -1.0
+                          ? GsrLineChart(
+                              gsr: gsr,
+                              minValue: widget.minGSRValue,
+                              maxValue: widget.maxGSRValue,
+                              bluetooth: widget.bluetooth,
+                            )
+                          : GsrLineChart(
+                              gsr: gsr,
+                              bluetooth: widget.bluetooth,
+                            ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      FutureBuilder<int>(
+        future: latestRespiratoryRate(),
+        builder: (context, snapshot) {
+          final respiratoryRate = snapshot.data ?? 0;
+          return _buildCard(
+            index: 3,
+            child: BreathingSensorPage(
+              bluetooth: widget.bluetooth,
+              repsirationRate: respiratoryRate,
+            ),
+          );
+        },
+      ),
     ];
 
     return SizedBox(
@@ -164,8 +313,8 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.black, // Set the border color here
-              width: 3, // You can adjust the width of the border
+              color: Colors.black,
+              width: 3,
             ),
           ),
           child: child,

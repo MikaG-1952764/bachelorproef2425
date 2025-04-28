@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(
                         width: 300,
                         height: 60,
-                        child: StressIndicator(sensorData.gsr),
+                        child: StressIndicator(sensorData.gsr, database),
                       ),
                       const SizedBox(height: 20),
                       SensorCardsPager(
