@@ -247,18 +247,28 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                   ],
                 ),
                 Expanded(
-                  child:
-                      widget.minGSRValue != -1.0 && widget.maxGSRValue != -1.0
-                          ? GsrLineChart(
+                  child: widget.minGSRValue != -1.0 &&
+                          widget.maxGSRValue != -1.0
+                      ? GsrLineChart(
+                          gsr: gsr,
+                          minValue: widget.minGSRValue,
+                          maxValue: widget.maxGSRValue,
+                          bluetooth: widget.bluetooth,
+                        )
+                      : FutureBuilder<int?>(
+                          future: widget.bluetooth
+                              .getDatabase()
+                              .getCurrentUserAverageGSR(),
+                          builder: (context, snapshot) {
+                            final averageGSR = snapshot.data?.toDouble() ?? 0.0;
+                            return GsrLineChart(
+                              minValue: averageGSR - 500,
+                              maxValue: averageGSR + 500,
                               gsr: gsr,
-                              minValue: widget.minGSRValue,
-                              maxValue: widget.maxGSRValue,
                               bluetooth: widget.bluetooth,
-                            )
-                          : GsrLineChart(
-                              gsr: gsr,
-                              bluetooth: widget.bluetooth,
-                            ),
+                            );
+                          },
+                        ),
                 ),
               ],
             ),

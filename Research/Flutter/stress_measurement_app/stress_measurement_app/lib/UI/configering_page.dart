@@ -148,7 +148,7 @@ class ConfiguringPage extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              const Text("Amount of reads"),
+              /*const Text("Amount of reads"),
               Container(
                 width: 200,
                 decoration: BoxDecoration(
@@ -165,7 +165,7 @@ class ConfiguringPage extends StatelessWidget {
                   keyboardType: TextInputType.number,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 20),*/
               SizedBox(
                 width: 100,
                 child: FloatingActionButton(
