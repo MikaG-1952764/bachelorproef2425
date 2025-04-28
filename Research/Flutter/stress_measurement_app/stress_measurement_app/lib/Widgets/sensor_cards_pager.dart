@@ -107,7 +107,7 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                               builder: (BuildContext context) => AlertDialog(
                                 title: const Text("Heart rate zones"),
                                 content: Text(
-                                    "The heart rate zones are as follows:\n\n"
+                                    "Your heart rate and spo2 (blood-oxygen level) is measured by a sensor with LEDs and a photosensor. The reflected light is measured by the photosensor, which in turn can be used to determine the heart rate and spo2.\n\nThe heart rate zones are as follows:\n\n"
                                     "1. Very Light: 0 - ${(maxHeartRate! * 0.57).round()} bpm\n\n"
                                     "2. Light: ${(maxHeartRate! * 0.57).round()} - ${(maxHeartRate! * 0.63).round()} bpm\n\n"
                                     "3. Moderate: ${(maxHeartRate! * 0.63).round()} - ${(maxHeartRate! * 0.76).round()} bpm\n\n"
