@@ -99,7 +99,31 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                     SizedBox(
                       width: 38,
                       child: IconButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            final maxHeartRate =
+                                await database.getCurrentUserMaxHeartRate();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: const Text("Heart rate zones"),
+                                content: Text(
+                                    "The heart rate zones are as follows:\n\n"
+                                    "1. Very Light: 0 - ${(maxHeartRate! * 0.57).round()} bpm\n\n"
+                                    "2. Light: ${(maxHeartRate! * 0.57).round()} - ${(maxHeartRate! * 0.63).round()} bpm\n\n"
+                                    "3. Moderate: ${(maxHeartRate! * 0.63).round()} - ${(maxHeartRate! * 0.76).round()} bpm\n\n"
+                                    "4. Vigorous (elevated): ${(maxHeartRate! * 0.76).round()} - ${(maxHeartRate! * 0.95).round()} bpm\n\n"
+                                    "4. Maximal: ${(maxHeartRate! * 0.95).round()} - $maxHeartRate bpm"),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("OK"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                           icon: const Icon(Icons.info_outline)),
                     ),
                     //const SizedBox(width: 22),
