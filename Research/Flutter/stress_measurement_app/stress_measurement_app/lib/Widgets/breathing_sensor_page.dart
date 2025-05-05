@@ -41,7 +41,36 @@ class BreathingSensorPage extends StatelessWidget {
                     fontSize: 24,
                     fontWeight: FontWeight.bold)),
             const Spacer(),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.info_outline))
+            IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text("Respiration Rate"),
+                      content: const SizedBox(
+                        height: 280,
+                        child: Column(
+                          children: [
+                            Text(
+                                "The number of inhalations and exhalations per minute. It reflects how your body responds to physical and emotional states. A higher rate may indicate stress or activity, while a lower rate is often linked to calm and relaxation."),
+                            SizedBox(height: 20),
+                            Text(
+                                "The normal range for an adult in rest is 10-30 breaths per minute. If you just walked/moved, your respiration rate may be outside of this normal range."),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("OK"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.info_outline))
           ],
         ),
         const SizedBox(height: 50),

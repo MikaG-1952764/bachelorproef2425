@@ -244,6 +244,34 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                       icon: const Icon(Icons.settings),
                       onPressed: widget.onGSRConfig,
                     ),
+                    const SizedBox(width: 4),
+                    SizedBox(
+                      width: 38,
+                      child: IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title:
+                                    const Text("GSR (Galvanic Skin Response)"),
+                                content: const SizedBox(
+                                  height: 160,
+                                  child: Text(
+                                      "GSR measures how much your skin conducts electricity, which changes with sweat gland activity. It reflects your body's stress or emotional arousal — higher GSR usually means higher stress or excitement."),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("OK"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.info_outline)),
+                    ),
                   ],
                 ),
                 Expanded(
