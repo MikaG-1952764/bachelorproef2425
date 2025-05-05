@@ -9,7 +9,6 @@ class ConfiguringPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final minController = TextEditingController();
     final maxController = TextEditingController();
-    final amountOfReadsController = TextEditingController();
 
     if (configuringValue == "Heart Rate") {
       return Scaffold(

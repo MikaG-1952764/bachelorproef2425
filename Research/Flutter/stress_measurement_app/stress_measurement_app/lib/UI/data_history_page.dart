@@ -19,6 +19,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
   final TextEditingController endDateController = TextEditingController();
   late Future<List<Map<String, dynamic>>> dataFuture;
   bool isFilterActive = false;
+  bool isGraphView = true;
 
   Future<List<Map<String, dynamic>>> fetchData() {
     switch (widget.pageName) {
@@ -37,158 +38,53 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchDataInRange(
+      DateTime startDate, DateTime endDate) {
+    switch (widget.pageName) {
+      case "Heart Rate":
+        return widget.bluetooth
+            .getDatabase()
+            .getHeartRateReadingsInRange(startDate, endDate);
+      case "GSR":
+        return widget.bluetooth
+            .getDatabase()
+            .getGSRReadingsInRange(startDate, endDate);
+      case "Spo2":
+        return widget.bluetooth
+            .getDatabase()
+            .getSpo2ReadingsInRange(startDate, endDate);
+      case "RespitoryRate":
+        return widget.bluetooth
+            .getDatabase()
+            .getRespitoryRateReadingsInRange(startDate, endDate);
+      default:
+        return Future.value([]);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    dataFuture = fetchData();
+    final now = DateTime.now();
+    dataFuture = fetchDataInRange(
+      DateTime(now.year, now.month, now.day),
+      now,
+    );
+    isFilterActive = true;
   }
 
+  @override
   Widget build(BuildContext context) {
-    Future<List<Map<String, dynamic>>> fetchDataInRange(
-        DateTime startDate, DateTime endDate) {
-      switch (widget.pageName) {
-        case "Heart Rate":
-          return widget.bluetooth
-              .getDatabase()
-              .getHeartRateReadingsInRange(startDate, endDate);
-        case "GSR":
-          return widget.bluetooth
-              .getDatabase()
-              .getGSRReadingsInRange(startDate, endDate);
-        case "Spo2":
-          return widget.bluetooth
-              .getDatabase()
-              .getSpo2ReadingsInRange(startDate, endDate);
-        case "RespitoryRate":
-          return widget.bluetooth
-              .getDatabase()
-              .getRespitoryRateReadingsInRange(startDate, endDate);
-        default:
-          return Future.value([]);
-      }
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: Text("${widget.pageName} data history"),
         actions: [
-          if (isFilterActive)
-            IconButton(
-                onPressed: () {
-                  setState(() {
-                    isFilterActive = false;
-                    startDateController.clear();
-                    endDateController.clear();
-                    dataFuture = fetchData();
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Filter removed"),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.filter_alt_off_sharp)),
           IconButton(
-            icon: const Icon(Icons.filter_alt_sharp),
+            icon: Icon(isGraphView ? Icons.table_chart : Icons.show_chart),
             onPressed: () {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text("Filter"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text("Select a date range"),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: startDateController,
-                            decoration: const InputDecoration(
-                              labelText: "Start Date",
-                              border: OutlineInputBorder(),
-                            ),
-                            readOnly: true,
-                            onTap: () {
-                              showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime.now(),
-                              ).then((pickedDate) {
-                                if (pickedDate != null) {
-                                  final formattedDate = DateFormat('dd/MM/yyyy')
-                                      .format(pickedDate);
-                                  startDateController.text = formattedDate;
-                                }
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: endDateController,
-                            decoration: const InputDecoration(
-                              labelText: "End Date",
-                              border: OutlineInputBorder(),
-                            ),
-                            readOnly: true,
-                            onTap: () {
-                              showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime.now(),
-                              ).then((pickedDate) {
-                                if (pickedDate != null) {
-                                  final formattedDate = DateFormat('dd/MM/yyyy')
-                                      .format(pickedDate);
-                                  endDateController.text = formattedDate;
-                                }
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text("Cancel"),
-                          onPressed: () {
-                            startDateController.clear();
-                            endDateController.clear();
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        TextButton(
-                          child: const Text("Apply"),
-                          onPressed: () {
-                            final DateFormat formatter =
-                                DateFormat('dd/MM/yyyy');
-                            final DateTime? startDate =
-                                formatter.parse(startDateController.text);
-                            final DateTime? endDate =
-                                formatter.parse(endDateController.text);
-                            setState(() {
-                              isFilterActive = true;
-                              dataFuture =
-                                  fetchDataInRange(startDate!, endDate!);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      "Filtering between ${startDateController.text} and ${endDateController.text}"),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                              startDateController.clear();
-                              endDateController.clear();
-                            }); // Refresh the UI
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  });
+              setState(() {
+                isGraphView = !isGraphView;
+              });
             },
           ),
         ],
@@ -239,7 +135,8 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
               ],
             ),
             const SizedBox(height: 10),
-            SizedBox(
+            if (isGraphView)
+              SizedBox(
                 height: 200,
                 width: 300,
                 child: Padding(
@@ -361,70 +258,73 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                       );
                     },
                   ),
-                )),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Text("Nr.",
-                            style: TextStyle(fontWeight: FontWeight.bold))),
-                  ),
                 ),
-                Container(
-                  width: 100,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Text("Date",
-                            style: TextStyle(fontWeight: FontWeight.bold))),
+              )
+            else ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Nr.",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
                   ),
-                ),
-                Container(
-                  width: 200,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 1.0)),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Text("Measurement",
-                            style: TextStyle(fontWeight: FontWeight.bold))),
+                  Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Date",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            FutureBuilder<List<Map<String, dynamic>>>(
-              future: dataFuture, // Fetch latest 10 readings
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text("Error: ${snapshot.error}");
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text("No data available.");
-                }
+                  Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Measurement",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
+                  ),
+                ],
+              ),
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: dataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text("No data available.");
+                  }
 
-                final readings = snapshot.data!;
-                return Column(
-                  children: readings.asMap().entries.map((entry) {
-                    final index = entry.key + 1;
-                    final reading = entry.value;
-                    return DataRowWidget(
-                      number: index.toString(),
-                      date: _formatDate(reading['date']),
-                      measurement: _formatMeasurement(reading),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
+                  final readings = snapshot.data!;
+                  return Column(
+                    children: readings.asMap().entries.map((entry) {
+                      final index = entry.key + 1;
+                      final reading = entry.value;
+                      return DataRowWidget(
+                        number: index.toString(),
+                        date: _formatDate(reading['date']),
+                        measurement: _formatMeasurement(reading),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -436,11 +336,11 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "Heart Rate":
         return "${reading['heartRate']} bpm";
       case "GSR":
-        return "${reading['gsr']} µS"; // Example unit for GSR
+        return "${reading['gsr']} µS";
       case "Spo2":
         return "${reading['spo2']} ms";
       case "RespitoryRate":
-        return "${reading['respiratoryRate']} breaths/min"; // Example unit for spo2
+        return "${reading['respiratoryRate']} breaths/min";
       default:
         return "Unknown";
     }
@@ -448,16 +348,13 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
   String _formatDate(String dateString) {
     try {
-      // Parse the American date string to a DateTime object
       final DateFormat americanFormat = DateFormat('yyyy-MM-dd');
       final DateTime parsedDate = americanFormat.parse(dateString);
-
-      // Convert the DateTime object to European format
       final DateFormat europeanFormat = DateFormat('dd/MM/yyyy');
       return europeanFormat.format(parsedDate);
     } catch (e) {
       print("Error parsing date: $e");
-      return dateString; // Return the original string if parsing fails
+      return dateString;
     }
   }
 
@@ -476,24 +373,24 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "Heart Rate":
         return 0;
       case "GSR":
-        return null; // Example, adjust based on your GSR data range
+        return null;
       case "Spo2":
-        return 0; // Example, adjust based on your SpO2 data range
+        return 0;
       default:
-        return null; // Default minY
+        return null;
     }
   }
 
   double? _getMaxY(String pageName) {
     switch (pageName) {
       case "Heart Rate":
-        return 340; // Adjust according to your HR data range
+        return 340;
       case "GSR":
-        return null; // Example, adjust based on your GSR data range
+        return null;
       case "Spo2":
-        return 140; // Example, adjust based on your SpO2 data range
+        return 140;
       default:
-        return null; // Default maxY
+        return null;
     }
   }
 }
