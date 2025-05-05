@@ -62,6 +62,53 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     }
   }
 
+  Future<Map<String, dynamic>> fetchMinMaxDataInRange(
+      DateTime startDate, DateTime endDate) async {
+    switch (widget.pageName) {
+      case "Heart Rate":
+        final heartRateData = await widget.bluetooth
+            .getDatabase()
+            .getHeartRateReadingsInRange(startDate, endDate);
+        return _getMinMax(heartRateData, 'heartRate');
+      case "GSR":
+        final gsrData = await widget.bluetooth
+            .getDatabase()
+            .getGSRReadingsInRange(startDate, endDate);
+        return _getMinMax(gsrData, 'gsr');
+      case "Spo2":
+        final spo2Data = await widget.bluetooth
+            .getDatabase()
+            .getSpo2ReadingsInRange(startDate, endDate);
+        return _getMinMax(spo2Data, 'spo2');
+      case "RespiratoryRate":
+        final respiratoryRateData = await widget.bluetooth
+            .getDatabase()
+            .getRespitoryRateReadingsInRange(startDate, endDate);
+        return _getMinMax(respiratoryRateData, 'respiratoryRate');
+      default:
+        return {}; // Return an empty map if no matching page
+    }
+  }
+
+  Map<String, dynamic> _getMinMax(List<Map<String, dynamic>> data, String key) {
+    if (data.isEmpty) {
+      return {'min': null, 'max': null}; // Return null if there's no data
+    }
+
+    // Ensure the date is parsed to DateTime
+    final values = data.map((entry) {
+      final dateString = entry['date'] as String;
+      final date =
+          DateTime.parse(dateString); // Parse the date string into DateTime
+      return entry[key] as num;
+    }).toList();
+
+    final min = values.reduce((a, b) => a < b ? a : b);
+    final max = values.reduce((a, b) => a > b ? a : b);
+
+    return {'min': min, 'max': max};
+  }
+
   @override
   void initState() {
     super.initState();
@@ -269,61 +316,57 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Text("Nr.",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      padding: EdgeInsets.all(5.0),
+                      child: Text("Date"),
                     ),
                   ),
                   Container(
-                    width: 100,
+                    width: 80,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Text("Date",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      padding: EdgeInsets.all(5.0),
+                      child: Text("Min"),
                     ),
                   ),
                   Container(
-                    width: 200,
+                    width: 80,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Text("Measurement",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      padding: EdgeInsets.all(5.0),
+                      child: Text("Max"),
                     ),
                   ),
                 ],
               ),
-              FutureBuilder<List<Map<String, dynamic>>>(
-                future: dataFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text("Error: ${snapshot.error}");
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text("No data available.");
-                  }
+              Expanded(
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: dataFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text("No data available."));
+                    }
 
-                  final readings = snapshot.data!;
-                  return Column(
-                    children: readings.asMap().entries.map((entry) {
-                      final index = entry.key + 1;
-                      final reading = entry.value;
-                      return DataRowWidget(
-                        number: index.toString(),
-                        date: _formatDate(reading['date']),
-                        measurement: _formatMeasurement(reading),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
+                    final data = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        final entry = data[index];
+                        return DataRowWidget(
+                          number: (index + 1).toString(),
+                          date: entry['date'],
+                          measurement: entry.values.last,
+                        );
+                      },
+                    );
+                  },
+                ),
+              )
             ],
           ],
         ),
@@ -331,66 +374,45 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     );
   }
 
-  String _formatMeasurement(Map<String, dynamic> reading) {
-    switch (widget.pageName) {
-      case "Heart Rate":
-        return "${reading['heartRate']} bpm";
-      case "GSR":
-        return "${reading['gsr']} µS";
-      case "Spo2":
-        return "${reading['spo2']} ms";
-      case "RespitoryRate":
-        return "${reading['respiratoryRate']} breaths/min";
-      default:
-        return "Unknown";
-    }
-  }
-
-  String _formatDate(String dateString) {
-    try {
-      final DateFormat americanFormat = DateFormat('yyyy-MM-dd');
-      final DateTime parsedDate = americanFormat.parse(dateString);
-      final DateFormat europeanFormat = DateFormat('dd/MM/yyyy');
-      return europeanFormat.format(parsedDate);
-    } catch (e) {
-      print("Error parsing date: $e");
-      return dateString;
-    }
-  }
-
-  String _formatShortDate(String dateString) {
-    try {
-      final DateFormat inputFormat = DateFormat('yyyy-MM-dd');
-      final DateTime parsed = inputFormat.parse(dateString);
-      return DateFormat('dd/MM').format(parsed);
-    } catch (_) {
-      return '';
-    }
-  }
-
-  double? _getMinY(String pageName) {
+  double _getMinY(String pageName) {
     switch (pageName) {
       case "Heart Rate":
         return 0;
       case "GSR":
-        return null;
+        return 0;
       case "Spo2":
+        return 90;
+      case "RespiratoryRate":
         return 0;
       default:
-        return null;
+        return 0;
     }
   }
 
-  double? _getMaxY(String pageName) {
+  double _getMaxY(String pageName) {
     switch (pageName) {
       case "Heart Rate":
-        return 340;
+        return 120;
       case "GSR":
-        return null;
+        return 50;
       case "Spo2":
-        return 140;
+        return 100;
+      case "RespiratoryRate":
+        return 40;
       default:
-        return null;
+        return 100;
     }
+  }
+
+  String _formatDate(String date) {
+    final DateTime dateTime = DateTime.parse(date);
+    final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    return formatter.format(dateTime);
+  }
+
+  String _formatShortDate(String date) {
+    final DateTime dateTime = DateTime.parse(date);
+    final DateFormat formatter = DateFormat('MM-dd');
+    return formatter.format(dateTime);
   }
 }
