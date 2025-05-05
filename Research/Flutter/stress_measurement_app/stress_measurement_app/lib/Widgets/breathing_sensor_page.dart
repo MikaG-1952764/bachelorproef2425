@@ -2,7 +2,9 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class BreathingSensorPage extends StatelessWidget {
   const BreathingSensorPage({
@@ -75,29 +77,42 @@ class BreathingSensorPage extends StatelessWidget {
         ),
         const SizedBox(height: 50),
         SizedBox(
-          height: 200, // or whatever size you want
-          child: LineChart(
-            LineChartData(
-              minY: -1.2,
-              maxY: 1.2,
-              titlesData: const FlTitlesData(show: false),
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
-              lineTouchData: const LineTouchData(enabled: false),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: generateBreathingGraph(repsirationRate),
-                  isCurved: true,
-                  color: Colors.blue,
-                  belowBarData: BarAreaData(show: false),
-                  dotData: const FlDotData(show: false),
-                )
-              ],
-            ),
+          height: 250, // or whatever size you want
+          child: SfRadialGauge(
+            axes: <RadialAxis>[
+              RadialAxis(
+                showTicks: false,
+                showLastLabel: true,
+                minimum: 10,
+                maximum: 30,
+                axisLineStyle: const AxisLineStyle(
+                  thickness: 10,
+                  color: Colors.green, // Configurable axis color
+                ),
+                pointers: [
+                  MarkerPointer(
+                    value: repsirationRate.toDouble(),
+                    color: Colors.black,
+                    markerHeight: 20,
+                  ),
+                ],
+                annotations: [
+                  GaugeAnnotation(
+                    widget: Text(
+                      "$repsirationRate breaths/min",
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    angle: 90,
+                    positionFactor: 0.0,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),
-        Center(
+        /*Center(
           child: Text(
             "Breathing Rate: \n $repsirationRate breaths/min",
             style: const TextStyle(
@@ -105,7 +120,7 @@ class BreathingSensorPage extends StatelessWidget {
               fontSize: 18,
             ),
           ),
-        ),
+        ),*/
         const SizedBox(height: 40),
         Container(
           decoration: BoxDecoration(
