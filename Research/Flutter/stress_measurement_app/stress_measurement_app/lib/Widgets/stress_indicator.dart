@@ -19,14 +19,14 @@ class StressIndicator extends StatelessWidget {
   Future<String> get stressLevel async {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
-    if (latestGsrValue > (0.023 * averageGsrValue!)) return "Stressed";
+    if (latestGsrValue > (0.10 * averageGsrValue!)) return "Stressed";
     return "No stress detected";
   }
 
   Future<Color> get stressColor async {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
-    if (latestGsrValue > (0.023 * averageGsrValue!)) return Colors.red;
+    if (latestGsrValue > (0.10 * averageGsrValue!)) return Colors.red;
     return Colors.green;
   }
 
@@ -47,8 +47,78 @@ class StressIndicator extends StatelessWidget {
             decoration: BoxDecoration(
                 color: color, borderRadius: BorderRadius.circular(10)),
             child: Center(
-                child: Text(level,
-                    style: const TextStyle(color: Colors.white, fontSize: 26))),
+                child: Row(
+              children: [
+                Text(level,
+                    style: const TextStyle(color: Colors.white, fontSize: 22)),
+                const Spacer(),
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text("Stress level"),
+                          content: SizedBox(
+                            height: 370,
+                            child: Column(
+                              children: [
+                                const Text(
+                                    "An estimate of how stressed your body is, based on skin response (GSR)."),
+                                const SizedBox(height: 10),
+                                const Text(
+                                    "Note: This is an approximation — stress is complex and can vary from person to person. The following levels are integrated: \n"),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 10,
+                                      height: 10,
+                                      color: Colors.red,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    const SizedBox(
+                                      width: 210,
+                                      child: Text(
+                                          "Your body is stressed. Try to relax and take a break. Your body is stressed if the GSR level is above 10% of your average GSR."),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 10,
+                                      height: 10,
+                                      color: Colors.green,
+                                    ),
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                    const SizedBox(
+                                      width: 210,
+                                      child: Text(
+                                          "Your body is not stressed. You are in a good state of mind. This is a good time to focus on your work or study."),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              child: const Text("OK"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.info_outline)),
+              ],
+            )),
           );
         }
       },
