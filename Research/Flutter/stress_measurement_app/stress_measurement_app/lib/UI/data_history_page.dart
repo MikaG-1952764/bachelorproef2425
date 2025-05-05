@@ -196,7 +196,49 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    setState(() {
+                      isFilterActive = true;
+                      dataFuture = fetchDataInRange(
+                        DateTime(now.year, now.month, now.day),
+                        now,
+                      );
+                    });
+                  },
+                  child: const Text("Today"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    final weekAgo = now.subtract(const Duration(days: 7));
+                    setState(() {
+                      isFilterActive = true;
+                      dataFuture = fetchDataInRange(weekAgo, now);
+                    });
+                  },
+                  child: const Text("Last 7 Days"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    final monthAgo = now.subtract(const Duration(days: 30));
+                    setState(() {
+                      isFilterActive = true;
+                      dataFuture = fetchDataInRange(monthAgo, now);
+                    });
+                  },
+                  child: const Text("Last 30 Days"),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             SizedBox(
                 height: 200,
                 width: 300,
