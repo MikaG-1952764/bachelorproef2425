@@ -316,53 +316,59 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Text("Date"),
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Nr.",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                     ),
                   ),
                   Container(
-                    width: 80,
+                    width: 100,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Text("Min"),
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Date",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                     ),
                   ),
                   Container(
-                    width: 80,
+                    width: 200,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
-                      padding: EdgeInsets.all(5.0),
-                      child: Text("Max"),
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Measurement",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                     ),
                   ),
                 ],
               ),
               Expanded(
                 child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: dataFuture,
+                  future: dataFuture, // Fetch latest 10 readings
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Center(child: Text("Error: ${snapshot.error}"));
+                      return Text("Error: ${snapshot.error}");
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text("No data available."));
+                      return const Text("No data available.");
                     }
 
-                    final data = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: data.length,
-                      itemBuilder: (context, index) {
-                        final entry = data[index];
+                    final readings = snapshot.data!;
+                    return Column(
+                      children: readings.asMap().entries.map((entry) {
+                        final index = entry.key + 1;
+                        final reading = entry.value;
                         return DataRowWidget(
-                          number: (index + 1).toString(),
-                          date: entry['date'],
-                          measurement: entry.values.last,
+                          number: index.toString(),
+                          date: _formatDate(reading['date']),
+                          measurement: _formatMeasurement(reading),
                         );
-                      },
+                      }).toList(),
                     );
                   },
                 ),
@@ -374,33 +380,44 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     );
   }
 
-  double _getMinY(String pageName) {
-    switch (pageName) {
+  String _formatMeasurement(Map<String, dynamic> reading) {
+    switch (widget.pageName) {
       case "Heart Rate":
-        return 0;
+        return "${reading['heartRate']} bpm";
       case "GSR":
-        return 0;
+        return "${reading['gsr']} µS"; // Example unit for GSR
       case "Spo2":
-        return 90;
-      case "RespiratoryRate":
-        return 0;
+        return "${reading['spo2']} ms";
+      case "RespitoryRate":
+        return "${reading['respiratoryRate']} breaths/min"; // Example unit for spo2
       default:
-        return 0;
+        return "Unknown";
     }
   }
 
-  double _getMaxY(String pageName) {
+  double? _getMinY(String pageName) {
     switch (pageName) {
       case "Heart Rate":
-        return 120;
+        return 0;
       case "GSR":
-        return 50;
+        return null; // Example, adjust based on your GSR data range
       case "Spo2":
-        return 100;
-      case "RespiratoryRate":
-        return 40;
+        return 0; // Example, adjust based on your SpO2 data range
       default:
-        return 100;
+        return null; // Default minY
+    }
+  }
+
+  double? _getMaxY(String pageName) {
+    switch (pageName) {
+      case "Heart Rate":
+        return 340; // Adjust according to your HR data range
+      case "GSR":
+        return null; // Example, adjust based on your GSR data range
+      case "Spo2":
+        return 140; // Example, adjust based on your SpO2 data range
+      default:
+        return null; // Default maxY
     }
   }
 
