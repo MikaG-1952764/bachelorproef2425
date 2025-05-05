@@ -214,74 +214,109 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                       }
 
                       final data = snapshot.data!;
-                      return LineChart(LineChartData(
-                        titlesData: const FlTitlesData(show: false),
-                        borderData: FlBorderData(show: false),
-                        gridData: const FlGridData(show: true),
-                        lineBarsData: [
-                          LineChartBarData(
-                            isCurved: false,
-                            spots: [
-                              if (data.isNotEmpty)
-                                FlSpot(
-                                    0,
-                                    data[0]
-                                        .values
-                                        .last
-                                        .toDouble()), // Using the first value of the first data object
-                              if (data.length > 1)
-                                FlSpot(
-                                    1,
-                                    data[1]
-                                        .values
-                                        .last
-                                        .toDouble()), // First value of the second object
-                              if (data.length > 2)
-                                FlSpot(
-                                    2,
-                                    data[2]
-                                        .values
-                                        .last
-                                        .toDouble()), // First value of the third object
-                              if (data.length > 3)
-                                FlSpot(3, data[3].values.last.toDouble()),
-                              if (data.length > 4)
-                                FlSpot(4, data[4].values.last.toDouble()),
-                              if (data.length > 5)
-                                FlSpot(5, data[5].values.last.toDouble()),
-                              if (data.length > 6)
-                                FlSpot(6, data[6].values.last.toDouble()),
-                              if (data.length > 7)
-                                FlSpot(7, data[7].values.last.toDouble()),
-                              if (data.length > 8)
-                                FlSpot(8, data[8].values.last.toDouble()),
-                              if (data.length > 9)
-                                FlSpot(9, data[9].values.last.toDouble()),
-                              if (data.length > 10)
-                                FlSpot(10, data[10].values.last.toDouble()),
-                            ],
-                            dotData: const FlDotData(show: true),
-                            belowBarData: BarAreaData(show: true),
-                          )
-                        ],
-                        minX: -0.5, // Add padding by adjusting the minX
-                        maxX: data.length.toDouble() + 0.5,
-                        minY: _getMinY(widget.pageName),
-                        maxY: _getMaxY(widget.pageName),
-                        // Adjust this based on your data range
-                        lineTouchData: LineTouchData(
-                          touchTooltipData: LineTouchTooltipData(
-                            getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                              return touchedSpots.map((spot) {
+                      return LineChart(
+                        LineChartData(
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: true,
+                            verticalInterval: 1,
+                            horizontalInterval: 10,
+                            getDrawingHorizontalLine: (value) => FlLine(
+                              color: Colors.grey.withOpacity(0.3),
+                              strokeWidth: 1,
+                            ),
+                            getDrawingVerticalLine: (value) => FlLine(
+                              color: Colors.grey.withOpacity(0.3),
+                              strokeWidth: 1,
+                            ),
+                          ),
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(value.toInt().toString(),
+                                      style: const TextStyle(fontSize: 10));
+                                },
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 1,
+                                getTitlesWidget: (value, meta) {
+                                  int index = value.toInt();
+                                  if (index >= 0 && index < data.length) {
+                                    final date =
+                                        _formatShortDate(data[index]['date']);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Text(date,
+                                          style: const TextStyle(fontSize: 10)),
+                                    );
+                                  } else {
+                                    return const Text('');
+                                  }
+                                },
+                              ),
+                            ),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                          ),
+                          borderData: FlBorderData(
+                            show: true,
+                            border: const Border(
+                              left: BorderSide(color: Colors.black),
+                              bottom: BorderSide(color: Colors.black),
+                            ),
+                          ),
+                          minX: 0,
+                          maxX: (data.length - 1).toDouble(),
+                          minY: _getMinY(widget.pageName),
+                          maxY: _getMaxY(widget.pageName),
+                          lineBarsData: [
+                            LineChartBarData(
+                              isCurved: true,
+                              barWidth: 3,
+                              dotData: FlDotData(show: true),
+                              belowBarData: BarAreaData(
+                                show: true,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.blue.withOpacity(0.3),
+                                    Colors.blue.withOpacity(0.0)
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                              ),
+                              color: Colors.blue,
+                              spots: List.generate(data.length, (i) {
+                                final value = data[i].values.last.toDouble();
+                                return FlSpot(i.toDouble(), value);
+                              }),
+                            ),
+                          ],
+                          lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (spots) => spots.map((spot) {
+                                final index = spot.x.toInt();
+                                final value = spot.y;
+                                final date = _formatDate(data[index]['date']);
                                 return LineTooltipItem(
-                                  "${spot.y}",
-                                  const TextStyle(color: Colors.white),
+                                  "$date\n${value.toStringAsFixed(1)}",
+                                  const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 );
-                              }).toList();
-                            },
+                              }).toList(),
+                            ),
                           ),
                         ),
-                      ));
+                      );
                     },
                   ),
                 )),
@@ -381,6 +416,16 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     } catch (e) {
       print("Error parsing date: $e");
       return dateString; // Return the original string if parsing fails
+    }
+  }
+
+  String _formatShortDate(String dateString) {
+    try {
+      final DateFormat inputFormat = DateFormat('yyyy-MM-dd');
+      final DateTime parsed = inputFormat.parse(dateString);
+      return DateFormat('dd/MM').format(parsed);
+    } catch (_) {
+      return '';
     }
   }
 
