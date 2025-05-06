@@ -339,16 +339,20 @@ class Bluetooth with ChangeNotifier {
                 switch (newData) {
                   case "HR":
                     print("in case hr");
-                    sensorData.setHeartData(hr);
-                    appDatabase
-                        .insertHeartRate(hr); // Save heart rate to database
+                    if (hr != -999) {
+                      sensorData.setHeartData(hr);
+                      appDatabase.insertHeartRate(hr);
+                    }
+                    // Save heart rate to database
                     newData =
                         "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
                     print("in case spo2");
-                    sensorData.setSpo2Data(spo2);
-                    appDatabase.insertSpo2(spo2);
+                    if (spo2 != -999) {
+                      sensorData.setSpo2Data(spo2);
+                      appDatabase.insertSpo2(spo2);
+                    }
                     newData = "all"; // Reset to all after SpO2 measurement
                     break;
                   case "GSR":
