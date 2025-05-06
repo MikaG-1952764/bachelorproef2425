@@ -19,7 +19,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
   final TextEditingController endDateController = TextEditingController();
   late Future<List<Map<String, dynamic>>> dataFuture;
   bool isFilterActive = false;
-  bool isGraphView = true;
+  bool isGraphView = true; // Example value, replace with actual calculation
 
   Future<List<Map<String, dynamic>>> fetchData() {
     switch (widget.pageName) {
@@ -72,19 +72,22 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return widget.bluetooth
             .getDatabase()
-            .getDailyMinMaxHeartRateInRange(startDate, endDate);
+            .getDailyMinMaxGSRInRange(startDate, endDate);
       case "Spo2":
         return widget.bluetooth
             .getDatabase()
-            .getDailyMinMaxHeartRateInRange(startDate, endDate);
+            .getDailyMinMaxSpO2InRange(startDate, endDate);
       case "RespitoryRate":
         return widget.bluetooth
             .getDatabase()
-            .getDailyMinMaxHeartRateInRange(startDate, endDate);
+            .getDailyMinMaxRespiratoryRateInRange(startDate, endDate);
       default:
         return Future.value([]);
     }
   }
+
+  Future<int?>? averageGsr;
+  String filter = "Today";
 
   @override
   void initState() {
@@ -95,10 +98,10 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       now,
     );
     isFilterActive = true;
+    averageGsr = widget.bluetooth.getDatabase().getCurrentUserAverageGSR();
   }
 
   @override
-  String filter = "Today";
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -248,7 +251,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                             LineChartBarData(
                               isCurved: true,
                               barWidth: 3,
-                              dotData: FlDotData(show: true),
+                              dotData: const FlDotData(show: true),
                               belowBarData: BarAreaData(
                                 show: true,
                                 gradient: LinearGradient(
@@ -321,8 +324,8 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               barGroups: data.asMap().entries.map((entry) {
                                 final index = entry.key;
                                 final item = entry.value;
-                                final min = item['minHeartRate'] as int;
-                                final max = item['maxHeartRate'] as int;
+                                final min = item['min'] as int;
+                                final max = item['max'] as int;
                                 return BarChartGroupData(
                                   x: index,
                                   barRods: [
@@ -337,29 +340,31 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                   showingTooltipIndicators: [0],
                                 );
                               }).toList(),
-                              titlesData: const FlTitlesData(
+                              titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: true,
-                                    /*getTitlesWidget: (value, meta) {
-                                      final index = value.toInt();
-                                      if (index < 0 || index >= data.length)
-                                        return Text('');
-                                      final dateStr = data[index]['day']
-                                          .toString()
-                                          .split(' ')[0];
-                                      return Text(
-                                          dateStr.substring(5)); // Show MM-DD
-                                    },*/
-                                  ),
+                                      showTitles: true,
+                                      getTitlesWidget: (value, meta) {
+                                        final index = value.toInt();
+                                        if (index < 0 || index >= data.length) {
+                                          return const SizedBox();
+                                        }
+                                        final dateStr = data[index]['day']
+                                            .toString()
+                                            .split(' ')[0];
+                                        return Text(dateStr
+                                            .substring(5)); // Shows MM-DD
+                                      }),
                                 ),
-                                topTitles: AxisTitles(
+                                topTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                                 leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                      showTitles: true, reservedSize: 36),
-                                ),
-                                rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: (widget.pageName == "GSR")
+                                            ? 40
+                                            : 36)),
+                                rightTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                               ),
                               borderData: FlBorderData(show: false),
@@ -409,8 +414,8 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               barGroups: data.asMap().entries.map((entry) {
                                 final index = entry.key;
                                 final item = entry.value;
-                                final min = item['minHeartRate'] as int;
-                                final max = item['maxHeartRate'] as int;
+                                final min = item['min'] as int;
+                                final max = item['max'] as int;
                                 return BarChartGroupData(
                                   x: index,
                                   barRods: [
@@ -425,29 +430,31 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                   showingTooltipIndicators: [0],
                                 );
                               }).toList(),
-                              titlesData: const FlTitlesData(
+                              titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                    showTitles: true,
-                                    /*getTitlesWidget: (value, meta) {
-                                      final index = value.toInt();
-                                      if (index < 0 || index >= data.length)
-                                        return Text('');
-                                      final dateStr = data[index]['day']
-                                          .toString()
-                                          .split(' ')[0];
-                                      return Text(
-                                          dateStr.substring(5)); // Show MM-DD
-                                    },*/
-                                  ),
+                                      showTitles: true,
+                                      getTitlesWidget: (value, meta) {
+                                        final index = value.toInt();
+                                        if (index < 0 || index >= data.length) {
+                                          return const SizedBox();
+                                        }
+                                        final dateStr = data[index]['day']
+                                            .toString()
+                                            .split(' ')[0];
+                                        return Text(dateStr
+                                            .substring(5)); // Shows MM-DD
+                                      }),
                                 ),
-                                topTitles: AxisTitles(
+                                topTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                                 leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                      showTitles: true, reservedSize: 36),
-                                ),
-                                rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                        showTitles: true,
+                                        reservedSize: (widget.pageName == "GSR")
+                                            ? 40
+                                            : 36)),
+                                rightTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                               ),
                               borderData: FlBorderData(show: false),
@@ -462,6 +469,72 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     ),
                   ),
                 ],
+              )
+            ] else if (filter == "Last 7 days" || filter == "Last 30 days") ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Nr.",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
+                  ),
+                  Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Min",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
+                  ),
+                  Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 1.0)),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text("Max",
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: dataFuture, // Fetch latest 10 readings
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text("No data available.");
+                    }
+
+                    final readings = snapshot.data!;
+                    return Column(
+                      children: readings.asMap().entries.map((entry) {
+                        final index = entry.key + 1;
+                        final reading = entry.value;
+                        return DataRowWidget(
+                          number: index.toString(),
+                          date: _formatDate(reading['minHeartRate']),
+                          measurement: reading['maxHeartRate'],
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
               )
             ] else ...[
               const SizedBox(height: 10),
@@ -556,7 +629,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "Heart Rate":
         return 0;
       case "GSR":
-        return null; // Example, adjust based on your GSR data range
+        return 1000; // Example, adjust based on your GSR data range
       case "Spo2":
         return 0; // Example, adjust based on your SpO2 data range
       default:
@@ -567,9 +640,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
   double? _getMaxY(String pageName) {
     switch (pageName) {
       case "Heart Rate":
-        return 340; // Adjust according to your HR data range
+        return 250; // Adjust according to your HR data range
       case "GSR":
-        return null; // Example, adjust based on your GSR data range
+        return 2500; // Example, adjust based on your GSR data range
       case "Spo2":
         return 140; // Example, adjust based on your SpO2 data range
       default:

@@ -471,11 +471,128 @@ class AppDatabase extends _$AppDatabase {
     groupedData.forEach((day, heartRates) {
       dailyMinMaxHeartRates.add({
         'day': day,
-        'minHeartRate': heartRates.reduce((a, b) => a < b ? a : b),
-        'maxHeartRate': heartRates.reduce((a, b) => a > b ? a : b),
+        'min': heartRates.reduce((a, b) => a < b ? a : b),
+        'max': heartRates.reduce((a, b) => a > b ? a : b),
       });
     });
 
     return dailyMinMaxHeartRates;
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyMinMaxSpO2InRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) return [];
+
+    final query = select(spo2)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+
+    final results = await query.get();
+
+    // Grouping data by date and calculating min and max heart rate per day
+    final Map<String, List<int>> groupedData = {};
+
+    for (var row in results) {
+      final date = row.createdAt!
+          .toLocal()
+          .toString()
+          .split(' ')[0]; // Get date part of createdAt
+      if (!groupedData.containsKey(date)) {
+        groupedData[date] = [];
+      }
+      groupedData[date]!.add(row.spo2);
+    }
+
+    final List<Map<String, dynamic>> dailyMinMaxSpo2s = [];
+
+    // Calculating min and max for each day
+    groupedData.forEach((day, spo2s) {
+      dailyMinMaxSpo2s.add({
+        'day': day,
+        'min': spo2s.reduce((a, b) => a < b ? a : b),
+        'max': spo2s.reduce((a, b) => a > b ? a : b),
+      });
+    });
+
+    return dailyMinMaxSpo2s;
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyMinMaxGSRInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) return [];
+
+    final query = select(gsr)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+
+    final results = await query.get();
+
+    // Grouping data by date and calculating min and max heart rate per day
+    final Map<String, List<int>> groupedData = {};
+
+    for (var row in results) {
+      final date = row.createdAt!
+          .toLocal()
+          .toString()
+          .split(' ')[0]; // Get date part of createdAt
+      if (!groupedData.containsKey(date)) {
+        groupedData[date] = [];
+      }
+      groupedData[date]!.add(row.gsr);
+    }
+
+    final List<Map<String, dynamic>> dailyMinMaxGSRs = [];
+
+    // Calculating min and max for each day
+    groupedData.forEach((day, gsrs) {
+      dailyMinMaxGSRs.add({
+        'day': day,
+        'min': gsrs.reduce((a, b) => a < b ? a : b),
+        'max': gsrs.reduce((a, b) => a > b ? a : b),
+      });
+    });
+
+    return dailyMinMaxGSRs;
+  }
+
+  Future<List<Map<String, dynamic>>> getDailyMinMaxRespiratoryRateInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) return [];
+
+    final query = select(respiratoryRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
+
+    final results = await query.get();
+
+    // Grouping data by date and calculating min and max heart rate per day
+    final Map<String, List<int>> groupedData = {};
+
+    for (var row in results) {
+      final date = row.createdAt!
+          .toLocal()
+          .toString()
+          .split(' ')[0]; // Get date part of createdAt
+      if (!groupedData.containsKey(date)) {
+        groupedData[date] = [];
+      }
+      groupedData[date]!.add(row.respiratoryRate);
+    }
+
+    final List<Map<String, dynamic>> dailyMinMaxRespiratoryRates = [];
+
+    // Calculating min and max for each day
+    groupedData.forEach((day, respiratoryRates) {
+      dailyMinMaxRespiratoryRates.add({
+        'day': day,
+        'min': respiratoryRates.reduce((a, b) => a < b ? a : b),
+        'max': respiratoryRates.reduce((a, b) => a > b ? a : b),
+      });
+    });
+
+    return dailyMinMaxRespiratoryRates;
   }
 }
