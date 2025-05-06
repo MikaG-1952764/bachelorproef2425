@@ -3,6 +3,7 @@ import 'package:stress_measurement_app/Models/bluetooth.dart';
 import 'package:stress_measurement_app/Widgets/data_row.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:stress_measurement_app/Widgets/data_row_min_max.dart';
 
 class DataHistoryPage extends StatefulWidget {
   const DataHistoryPage(
@@ -475,18 +476,18 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
               Row(
                 children: [
                   Container(
-                    width: 40,
+                    width: 100,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Center(
-                          child: Text("Nr.",
+                          child: Text("Date",
                               style: TextStyle(fontWeight: FontWeight.bold))),
                     ),
                   ),
                   Container(
-                    width: 100,
+                    width: 120,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
@@ -497,7 +498,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     ),
                   ),
                   Container(
-                    width: 200,
+                    width: 120,
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 1.0)),
                     child: const Padding(
@@ -526,10 +527,10 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                       children: readings.asMap().entries.map((entry) {
                         final index = entry.key + 1;
                         final reading = entry.value;
-                        return DataRowWidget(
-                          number: index.toString(),
-                          date: _formatDate(reading['minHeartRate']),
-                          measurement: reading['maxHeartRate'],
+                        return DataRowMinMaxWidget(
+                          date: _formatDate(reading['day']),
+                          min: _formatMinMeasurement(reading),
+                          max: _formatMaxMeasurement(reading),
                         );
                       }).toList(),
                     );
@@ -619,6 +620,36 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
         return "${reading['spo2']} ms";
       case "RespitoryRate":
         return "${reading['respiratoryRate']} breaths/min"; // Example unit for spo2
+      default:
+        return "Unknown";
+    }
+  }
+
+  String _formatMinMeasurement(Map<String, dynamic> reading) {
+    switch (widget.pageName) {
+      case "Heart Rate":
+        return "${reading['min']} bpm";
+      case "GSR":
+        return "${reading['min']} µS"; // Example unit for GSR
+      case "Spo2":
+        return "${reading['min']} ms";
+      case "RespitoryRate":
+        return "${reading['min']} breaths/min"; // Example unit for spo2
+      default:
+        return "Unknown";
+    }
+  }
+
+  String _formatMaxMeasurement(Map<String, dynamic> reading) {
+    switch (widget.pageName) {
+      case "Heart Rate":
+        return "${reading['max']} bpm";
+      case "GSR":
+        return "${reading['max']} µS"; // Example unit for GSR
+      case "Spo2":
+        return "${reading['max']} ms";
+      case "RespitoryRate":
+        return "${reading['max']} breaths/min"; // Example unit for spo2
       default:
         return "Unknown";
     }
