@@ -403,6 +403,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                           }
 
                           final data = snapshot.data!;
+                          print("data size: ${data.length}");
                           return BarChart(
                             BarChartData(
                               barGroups: data.asMap().entries.map((entry) {

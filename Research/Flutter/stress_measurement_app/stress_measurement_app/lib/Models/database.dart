@@ -444,30 +444,38 @@ class AppDatabase extends _$AppDatabase {
       DateTime startDate, DateTime endDate) async {
     if (userId == null) return [];
 
-    final result = await customSelect(
-      '''
-    SELECT 
-      DATE(created_at) as day,
-      MIN(heart_rate) as minHeartRate,
-      MAX(heart_rate) as maxHeartRate
-    FROM heart_rate
-    WHERE user_id = ? AND created_at BETWEEN ? AND ?
-    GROUP BY day
-    ORDER BY day ASC
-    ''',
-      variables: [
-        Variable.withInt(userId!),
-        Variable.withDateTime(startDate),
-        Variable.withDateTime(endDate),
-      ],
-    ).get();
+    final query = select(heartRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..where((t) => t.createdAt.isBetweenValues(startDate, endDate))
+      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
 
-    return result
-        .map((row) => {
-              'day': row.data['day'],
-              'minHeartRate': row.data['minHeartRate'],
-              'maxHeartRate': row.data['maxHeartRate'],
-            })
-        .toList();
+    final results = await query.get();
+
+    // Grouping data by date and calculating min and max heart rate per day
+    final Map<String, List<int>> groupedData = {};
+
+    for (var row in results) {
+      final date = row.createdAt!
+          .toLocal()
+          .toString()
+          .split(' ')[0]; // Get date part of createdAt
+      if (!groupedData.containsKey(date)) {
+        groupedData[date] = [];
+      }
+      groupedData[date]!.add(row.heartRate);
+    }
+
+    final List<Map<String, dynamic>> dailyMinMaxHeartRates = [];
+
+    // Calculating min and max for each day
+    groupedData.forEach((day, heartRates) {
+      dailyMinMaxHeartRates.add({
+        'day': day,
+        'minHeartRate': heartRates.reduce((a, b) => a < b ? a : b),
+        'maxHeartRate': heartRates.reduce((a, b) => a > b ? a : b),
+      });
+    });
+
+    return dailyMinMaxHeartRates;
   }
 }
