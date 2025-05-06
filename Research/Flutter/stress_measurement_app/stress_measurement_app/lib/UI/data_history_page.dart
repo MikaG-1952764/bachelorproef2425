@@ -62,51 +62,28 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
     }
   }
 
-  Future<Map<String, dynamic>> fetchMinMaxDataInRange(
+  Future<List<Map<String, dynamic>>> fetchMinMaxDataInRange(
       DateTime startDate, DateTime endDate) async {
     switch (widget.pageName) {
       case "Heart Rate":
-        final heartRateData = await widget.bluetooth
+        return widget.bluetooth
             .getDatabase()
-            .getHeartRateReadingsInRange(startDate, endDate);
-        return _getMinMax(heartRateData, 'heartRate');
+            .getDailyMinMaxHeartRateInRange(startDate, endDate);
       case "GSR":
-        final gsrData = await widget.bluetooth
+        return widget.bluetooth
             .getDatabase()
-            .getGSRReadingsInRange(startDate, endDate);
-        return _getMinMax(gsrData, 'gsr');
+            .getDailyMinMaxHeartRateInRange(startDate, endDate);
       case "Spo2":
-        final spo2Data = await widget.bluetooth
+        return widget.bluetooth
             .getDatabase()
-            .getSpo2ReadingsInRange(startDate, endDate);
-        return _getMinMax(spo2Data, 'spo2');
-      case "RespiratoryRate":
-        final respiratoryRateData = await widget.bluetooth
+            .getDailyMinMaxHeartRateInRange(startDate, endDate);
+      case "RespitoryRate":
+        return widget.bluetooth
             .getDatabase()
-            .getRespitoryRateReadingsInRange(startDate, endDate);
-        return _getMinMax(respiratoryRateData, 'respiratoryRate');
+            .getDailyMinMaxHeartRateInRange(startDate, endDate);
       default:
-        return {}; // Return an empty map if no matching page
+        return Future.value([]);
     }
-  }
-
-  Map<String, dynamic> _getMinMax(List<Map<String, dynamic>> data, String key) {
-    if (data.isEmpty) {
-      return {'min': null, 'max': null}; // Return null if there's no data
-    }
-
-    // Ensure the date is parsed to DateTime
-    final values = data.map((entry) {
-      final dateString = entry['date'] as String;
-      final date =
-          DateTime.parse(dateString); // Parse the date string into DateTime
-      return entry[key] as num;
-    }).toList();
-
-    final min = values.reduce((a, b) => a < b ? a : b);
-    final max = values.reduce((a, b) => a > b ? a : b);
-
-    return {'min': min, 'max': max};
   }
 
   @override
@@ -121,6 +98,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
   }
 
   @override
+  String filter = "Today";
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -149,6 +127,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     final now = DateTime.now();
                     setState(() {
                       isFilterActive = true;
+                      filter = "Today";
                       dataFuture = fetchDataInRange(
                         DateTime(now.year, now.month, now.day),
                         now,
@@ -163,10 +142,11 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     final weekAgo = now.subtract(const Duration(days: 7));
                     setState(() {
                       isFilterActive = true;
-                      dataFuture = fetchDataInRange(weekAgo, now);
+                      filter = "Last 7 days";
+                      dataFuture = fetchMinMaxDataInRange(weekAgo, now);
                     });
                   },
-                  child: const Text("Last 7 Days"),
+                  child: const Text("Last 7 days"),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -174,18 +154,19 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     final monthAgo = now.subtract(const Duration(days: 30));
                     setState(() {
                       isFilterActive = true;
-                      dataFuture = fetchDataInRange(monthAgo, now);
+                      filter = "Last 30 days";
+                      dataFuture = fetchMinMaxDataInRange(monthAgo, now);
                     });
                   },
-                  child: const Text("Last 30 Days"),
+                  child: const Text("Last 30 days"),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            if (isGraphView)
+            if (isGraphView && filter == "Today")
               SizedBox(
-                height: 200,
-                width: 300,
+                height: 300,
+                width: 350,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -291,7 +272,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               getTooltipItems: (spots) => spots.map((spot) {
                                 final index = spot.x.toInt();
                                 final value = spot.y;
-                                final date = _formatDate(data[index]['date']);
+                                final date = _formatDate(data[index]['day']);
                                 return LineTooltipItem(
                                   "$date\n${value.toStringAsFixed(1)}",
                                   const TextStyle(
@@ -307,7 +288,181 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                   ),
                 ),
               )
-            else ...[
+            else if (isGraphView && filter == "Last 7 days") ...[
+              Column(
+                children: [
+                  const SizedBox(
+                    height: 60,
+                  ),
+                  SizedBox(
+                    height: 300,
+                    width: 350,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: dataFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text("Error: ${snapshot.error}"));
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                                child: Text("No data available."));
+                          }
+
+                          final data = snapshot.data!;
+                          return BarChart(
+                            BarChartData(
+                              barGroups: data.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
+                                final min = item['minHeartRate'] as int;
+                                final max = item['maxHeartRate'] as int;
+                                return BarChartGroupData(
+                                  x: index,
+                                  barRods: [
+                                    BarChartRodData(
+                                      fromY: min.toDouble(),
+                                      toY: max.toDouble(),
+                                      width: 8,
+                                      color: Colors.blueAccent,
+                                      borderRadius: BorderRadius.zero,
+                                    )
+                                  ],
+                                  showingTooltipIndicators: [0],
+                                );
+                              }).toList(),
+                              titlesData: const FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    /*getTitlesWidget: (value, meta) {
+                                      final index = value.toInt();
+                                      if (index < 0 || index >= data.length)
+                                        return Text('');
+                                      final dateStr = data[index]['day']
+                                          .toString()
+                                          .split(' ')[0];
+                                      return Text(
+                                          dateStr.substring(5)); // Show MM-DD
+                                    },*/
+                                  ),
+                                ),
+                                topTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                      showTitles: true, reservedSize: 36),
+                                ),
+                                rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              gridData: const FlGridData(show: true),
+                              minY: _getMinY(widget.pageName),
+                              maxY: _getMaxY(widget.pageName),
+                            ),
+                          );
+                          ;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ] else if (isGraphView && filter == "Last 30 days") ...[
+              Column(
+                children: [
+                  const SizedBox(
+                    height: 60,
+                  ),
+                  SizedBox(
+                    height: 300,
+                    width: 350,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      child: FutureBuilder<List<Map<String, dynamic>>>(
+                        future: dataFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text("Error: ${snapshot.error}"));
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                                child: Text("No data available."));
+                          }
+
+                          final data = snapshot.data!;
+                          return BarChart(
+                            BarChartData(
+                              barGroups: data.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
+                                final min = item['minHeartRate'] as int;
+                                final max = item['maxHeartRate'] as int;
+                                return BarChartGroupData(
+                                  x: index,
+                                  barRods: [
+                                    BarChartRodData(
+                                      fromY: min.toDouble(),
+                                      toY: max.toDouble(),
+                                      width: 8,
+                                      color: Colors.blueAccent,
+                                      borderRadius: BorderRadius.zero,
+                                    )
+                                  ],
+                                  showingTooltipIndicators: [0],
+                                );
+                              }).toList(),
+                              titlesData: const FlTitlesData(
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    /*getTitlesWidget: (value, meta) {
+                                      final index = value.toInt();
+                                      if (index < 0 || index >= data.length)
+                                        return Text('');
+                                      final dateStr = data[index]['day']
+                                          .toString()
+                                          .split(' ')[0];
+                                      return Text(
+                                          dateStr.substring(5)); // Show MM-DD
+                                    },*/
+                                  ),
+                                ),
+                                topTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                      showTitles: true, reservedSize: 36),
+                                ),
+                                rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false)),
+                              ),
+                              borderData: FlBorderData(show: false),
+                              gridData: const FlGridData(show: true),
+                              minY: _getMinY(widget.pageName),
+                              maxY: _getMaxY(widget.pageName),
+                            ),
+                          );
+                          ;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ] else ...[
               const SizedBox(height: 10),
               Row(
                 children: [

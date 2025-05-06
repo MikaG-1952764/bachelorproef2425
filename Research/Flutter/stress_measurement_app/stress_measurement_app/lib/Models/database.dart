@@ -439,4 +439,35 @@ class AppDatabase extends _$AppDatabase {
 
     return results;
   }
+
+  Future<List<Map<String, dynamic>>> getDailyMinMaxHeartRateInRange(
+      DateTime startDate, DateTime endDate) async {
+    if (userId == null) return [];
+
+    final result = await customSelect(
+      '''
+    SELECT 
+      DATE(created_at) as day,
+      MIN(heart_rate) as minHeartRate,
+      MAX(heart_rate) as maxHeartRate
+    FROM heart_rate
+    WHERE user_id = ? AND created_at BETWEEN ? AND ?
+    GROUP BY day
+    ORDER BY day ASC
+    ''',
+      variables: [
+        Variable.withInt(userId!),
+        Variable.withDateTime(startDate),
+        Variable.withDateTime(endDate),
+      ],
+    ).get();
+
+    return result
+        .map((row) => {
+              'day': row.data['day'],
+              'minHeartRate': row.data['minHeartRate'],
+              'maxHeartRate': row.data['maxHeartRate'],
+            })
+        .toList();
+  }
 }
