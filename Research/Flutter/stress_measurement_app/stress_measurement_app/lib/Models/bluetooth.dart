@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
@@ -538,11 +540,12 @@ class Bluetooth with ChangeNotifier {
           SensorData data = await readSingleData(sensorData);
 
           stopMeasurement();
+          return data.breathingRate;
         }
       }
     }
     print("START command characteristic not found");
-    return sensorData.breathingRate;
+    throw Exception("Unable to measure breathing rate");
   }
 
   Future<int> getAverageGSR() async {

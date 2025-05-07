@@ -1,8 +1,5 @@
-import 'dart:math';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
-import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
