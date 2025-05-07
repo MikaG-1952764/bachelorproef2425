@@ -18,20 +18,6 @@ class BreathingSensorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> generateBreathingGraph(int breathsPerMinute) {
-      List<FlSpot> points = [];
-      double secondsPerBreath = 60 / breathsPerMinute;
-      double totalTime = 20.0;
-      double step = 0.1; // smaller = smoother curve
-
-      for (double t = 0; t <= totalTime; t += step) {
-        double phase = 2 * pi * (t % secondsPerBreath) / secondsPerBreath;
-        double y = sin(phase); // breathing up/down
-        points.add(FlSpot(t, y));
-      }
-      return points;
-    }
-
     return Column(
       children: [
         const SizedBox(height: 10),
