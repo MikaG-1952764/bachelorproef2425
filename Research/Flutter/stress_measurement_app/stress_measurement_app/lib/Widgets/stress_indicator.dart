@@ -89,7 +89,7 @@ class StressIndicator extends StatelessWidget {
                             child: Column(
                               children: [
                                 const Text(
-                                    "An estimate of how stressed your body is, based on skin response (GSR)."),
+                                    "An estimate of how stressed your body is, based on skin response (GSR) and respiration rate. \n IMPORTANT: The stress indicator is only accurate when 'All' is selected when measuring."),
                                 const SizedBox(height: 10),
                                 const Text(
                                     "Note: This is an approximation — stress is complex and can vary from person to person. The following levels are integrated: \n"),
