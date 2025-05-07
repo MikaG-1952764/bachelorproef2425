@@ -16,17 +16,36 @@ class StressIndicator extends StatelessWidget {
     return readings;
   }
 
+  Future<int?> respiratoryRate() async {
+    final readings = await database.getLatestRespiratoryRateReadings(1);
+    return readings.isNotEmpty ? readings.first['respiratoryRate'] : 0;
+  }
+
   Future<String> get stressLevel async {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
-    if (latestGsrValue > (0.10 * averageGsrValue!)) return "Stressed";
+    final latestRespiratoryRate = await respiratoryRate();
+    if (latestGsrValue > (0.10 * averageGsrValue!) ||
+        latestRespiratoryRate! > 16) {
+      return "Stressed";
+    } else if (latestGsrValue > (0.05 * averageGsrValue!) ||
+        latestRespiratoryRate! > 14) {
+      return "Moderately Stressed";
+    }
     return "No stress detected";
   }
 
   Future<Color> get stressColor async {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
-    if (latestGsrValue > (0.10 * averageGsrValue!)) return Colors.red;
+    final latestRespiratoryRate = await respiratoryRate();
+    if (latestGsrValue > (0.10 * averageGsrValue!) ||
+        latestRespiratoryRate! > 16) {
+      return Colors.red;
+    } else if (latestGsrValue > (0.05 * averageGsrValue!) ||
+        latestRespiratoryRate! > 14) {
+      return Colors.orange;
+    }
     return Colors.green;
   }
 

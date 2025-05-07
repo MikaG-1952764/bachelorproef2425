@@ -257,6 +257,29 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getLatestRespiratoryRateReadings(
+      int limit) async {
+    if (userId == null) {
+      return []; // No user selected, return an empty list
+    }
+
+    final query = (select(respiratoryRate)
+      ..where((t) => t.userId.equals(userId!))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+      ..limit(limit));
+
+    final results = await query.map((row) {
+      return {
+        'date': row.createdAt
+            .toString()
+            .split(' ')[0], // Extract only the date part
+        'respiratoryRate': row.respiratoryRate,
+      };
+    }).get();
+
+    return results;
+  }
+
   Future<List<Map<String, dynamic>>> getLatestGSRReadings(int limit) async {
     if (userId == null) {
       return []; // No user selected, return an empty list
