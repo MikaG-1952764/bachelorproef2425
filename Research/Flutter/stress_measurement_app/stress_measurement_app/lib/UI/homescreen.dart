@@ -541,6 +541,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       bluetooth
                                           .getDatabase()
                                           .updateAverageGSR(avgGSR);
+                                      bluetooth
+                                          .getDatabase()
+                                          .updateRestingRespiratoryRate(
+                                              restingRespirationRate);
                                       if (context.mounted) {
                                         Navigator.pop(context);
                                         showDialog(
