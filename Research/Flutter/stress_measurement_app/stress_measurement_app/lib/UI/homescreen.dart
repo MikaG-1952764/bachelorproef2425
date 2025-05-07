@@ -531,6 +531,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           await bluetooth.getAverageHeartRate();
                                       final avgGSR =
                                           await bluetooth.getAverageGSR();
+                                      final restingRespirationRate =
+                                          await bluetooth
+                                              .getRestingRespiration();
 
                                       bluetooth
                                           .getDatabase()

@@ -512,6 +512,39 @@ class Bluetooth with ChangeNotifier {
     throw Exception("Unable to calculate average heart rate");
   }
 
+  Future<int> getRestingRespiration() async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+    }
+
+    SensorData sensorData =
+        SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0);
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          // Command Characteristic
+          print("Sending START BREATHING command...");
+          await characteristic.write(utf8.encode("START BREATHING"),
+              withoutResponse: false);
+          isMeasuring = true;
+          newData = "Breathing"; // Set the newData variable to "HR"
+          print("Measurement started");
+          sensorData.setData(0, 0, 0, 0);
+          // Wait for the data to come back before proceeding
+          SensorData data = await readSingleData(sensorData);
+
+          stopMeasurement();
+        }
+      }
+    }
+    print("START command characteristic not found");
+    return sensorData.breathingRate;
+  }
+
   Future<int> getAverageGSR() async {
     if (connectedDevice == null) {
       print("No device connected");
