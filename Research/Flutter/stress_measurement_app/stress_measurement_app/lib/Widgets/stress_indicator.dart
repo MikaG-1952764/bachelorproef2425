@@ -16,6 +16,11 @@ class StressIndicator extends StatelessWidget {
     return readings;
   }
 
+  Future<int?> restingRespiratory() async {
+    final readings = await database.getCurrentUserRestingRespirationRate();
+    return readings;
+  }
+
   Future<int?> respiratoryRate() async {
     final readings = await database.getLatestRespiratoryRateReadings(1);
     return readings.isNotEmpty ? readings.first['respiratoryRate'] : 0;
@@ -25,11 +30,13 @@ class StressIndicator extends StatelessWidget {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
     final latestRespiratoryRate = await respiratoryRate();
-    if (latestGsrValue > (0.10 * averageGsrValue!) ||
-        latestRespiratoryRate! > 16) {
+    final restingRepsiratoryRate = await restingRespiratory();
+
+    if (latestGsrValue >= (1.10 * averageGsrValue!) ||
+        latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.30)) {
       return "Stressed";
-    } else if (latestGsrValue > (0.05 * averageGsrValue!) ||
-        latestRespiratoryRate! > 14) {
+    } else if (latestGsrValue >= (1.05 * averageGsrValue!) ||
+        latestRespiratoryRate! >= restingRepsiratoryRate! * 1.20) {
       return "Moderately Stressed";
     }
     return "No stress detected";
