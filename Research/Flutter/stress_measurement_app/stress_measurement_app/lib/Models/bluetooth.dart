@@ -157,7 +157,7 @@ class Bluetooth with ChangeNotifier {
               withoutResponse: false);
           isMeasuring = true;
           print("Measurement started");
-          readData(sensorData);
+          readData(sensorData); // Stop the measurement after collecting data
           notifyListeners(); // Stop the measurement after collecting data
         }
       }
@@ -388,8 +388,9 @@ class Bluetooth with ChangeNotifier {
                 value.clear();
 
                 print("Max readings received. Stopping measurement.");
-
+                isMeasuring = false;
                 // Stop notifications before stopping measurement
+                notifyListeners();
                 await characteristic.setNotifyValue(false);
                 receivedDataCount = 0;
                 print("Received readings: $receivedDataCount");
