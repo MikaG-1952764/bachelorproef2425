@@ -160,51 +160,58 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: TextButton(
                                                   onPressed: () => {
-                                                    showDialog(
-                                                      context: context,
-                                                      barrierDismissible:
-                                                          false, // Prevent closing manually
-                                                      builder: (context) {
-                                                        // Start measurement after build completes
-                                                        WidgetsBinding.instance
-                                                            .addPostFrameCallback(
-                                                                (_) {
-                                                          bluetooth
-                                                              .startMeasurement(
-                                                            Provider.of<
-                                                                    SensorData>(
-                                                                context,
-                                                                listen: false),
-                                                          );
-                                                        });
-
-                                                        // Set up a listener to close the dialog when measurement is done
-                                                        bluetooth
-                                                            .addListener(() {
-                                                          if (!bluetooth
-                                                                  .isMeasuring &&
-                                                              Navigator.canPop(
-                                                                  context)) {
-                                                            Navigator.pop(
-                                                                context); // Close the "Measuring..." dialog
+                                                    Navigator.pop(
+                                                        context), // Close the dialog
+                                                    Future.delayed(
+                                                        Duration.zero, () {
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false, // Prevent closing manually
+                                                        builder: (context) {
+                                                          // Start measurement after build completes
+                                                          WidgetsBinding
+                                                              .instance
+                                                              .addPostFrameCallback(
+                                                                  (_) {
                                                             bluetooth
-                                                                .removeListener(
-                                                                    () {}); // Clean up
-                                                          }
-                                                        });
+                                                                .startMeasurement(
+                                                              Provider.of<
+                                                                      SensorData>(
+                                                                  context,
+                                                                  listen:
+                                                                      false),
+                                                            );
+                                                          });
 
-                                                        return const AlertDialog(
-                                                          title: Text(
-                                                              "Measuring..."),
-                                                          content: SizedBox(
-                                                            height: 60,
-                                                            child: Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                          ),
-                                                        );
-                                                      },
-                                                    )
+                                                          // Set up a listener to close the dialog when measurement is done
+                                                          bluetooth
+                                                              .addListener(() {
+                                                            if (!bluetooth
+                                                                    .isMeasuring &&
+                                                                Navigator.canPop(
+                                                                    context)) {
+                                                              Navigator.pop(
+                                                                  context); // Close the "Measuring..." dialog
+                                                              bluetooth
+                                                                  .removeListener(
+                                                                      () {}); // Clean up
+                                                            }
+                                                          });
+
+                                                          return const AlertDialog(
+                                                            title: Text(
+                                                                "Measuring..."),
+                                                            content: SizedBox(
+                                                              height: 60,
+                                                              child: Center(
+                                                                  child:
+                                                                      CircularProgressIndicator()),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    })
                                                   },
                                                   child: const Text(
                                                     "All",
@@ -224,52 +231,59 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: TextButton(
                                                   onPressed: () => {
+                                                    Navigator.pop(
+                                                        context), // Close the dialog
                                                     // Close the dialog
-                                                    showDialog(
-                                                      context: context,
-                                                      barrierDismissible:
-                                                          false, // Prevent closing manually
-                                                      builder: (context) {
-                                                        // Start measurement after build completes
-                                                        WidgetsBinding.instance
-                                                            .addPostFrameCallback(
-                                                                (_) {
-                                                          bluetooth
-                                                              .startHeartMeasurement(
-                                                            Provider.of<
-                                                                    SensorData>(
-                                                                context,
-                                                                listen: false),
-                                                          );
-                                                        });
-
-                                                        // Set up a listener to close the dialog when measurement is done
-                                                        bluetooth
-                                                            .addListener(() {
-                                                          if (!bluetooth
-                                                                  .isMeasuring &&
-                                                              Navigator.canPop(
-                                                                  context)) {
-                                                            Navigator.pop(
-                                                                context); // Close the "Measuring..." dialog
+                                                    Future.delayed(
+                                                        Duration.zero, () {
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false, // Prevent closing manually
+                                                        builder: (context) {
+                                                          // Start measurement after build completes
+                                                          WidgetsBinding
+                                                              .instance
+                                                              .addPostFrameCallback(
+                                                                  (_) {
                                                             bluetooth
-                                                                .removeListener(
-                                                                    () {}); // Clean up
-                                                          }
-                                                        });
+                                                                .startHeartMeasurement(
+                                                              Provider.of<
+                                                                      SensorData>(
+                                                                  context,
+                                                                  listen:
+                                                                      false),
+                                                            );
+                                                          });
 
-                                                        return const AlertDialog(
-                                                          title: Text(
-                                                              "Measuring..."),
-                                                          content: SizedBox(
-                                                            height: 60,
-                                                            child: Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                          ),
-                                                        );
-                                                      },
-                                                    )
+                                                          // Set up a listener to close the dialog when measurement is done
+                                                          bluetooth
+                                                              .addListener(() {
+                                                            if (!bluetooth
+                                                                    .isMeasuring &&
+                                                                Navigator.canPop(
+                                                                    context)) {
+                                                              Navigator.pop(
+                                                                  context); // Close the "Measuring..." dialog
+                                                              bluetooth
+                                                                  .removeListener(
+                                                                      () {}); // Clean up
+                                                            }
+                                                          });
+
+                                                          return const AlertDialog(
+                                                            title: Text(
+                                                                "Measuring..."),
+                                                            content: SizedBox(
+                                                              height: 60,
+                                                              child: Center(
+                                                                  child:
+                                                                      CircularProgressIndicator()),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    })
                                                   },
                                                   child: const Text(
                                                     "Heart Rate",
@@ -297,51 +311,59 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: TextButton(
                                                   onPressed: () => {
-                                                    showDialog(
-                                                      context: context,
-                                                      barrierDismissible:
-                                                          false, // Prevent closing manually
-                                                      builder: (context) {
-                                                        // Start measurement after build completes
-                                                        WidgetsBinding.instance
-                                                            .addPostFrameCallback(
-                                                                (_) {
-                                                          bluetooth
-                                                              .startSpo2Measurement(
-                                                            Provider.of<
-                                                                    SensorData>(
-                                                                context,
-                                                                listen: false),
-                                                          );
-                                                        });
-
-                                                        // Set up a listener to close the dialog when measurement is done
-                                                        bluetooth
-                                                            .addListener(() {
-                                                          if (!bluetooth
-                                                                  .isMeasuring &&
-                                                              Navigator.canPop(
-                                                                  context)) {
-                                                            Navigator.pop(
-                                                                context); // Close the "Measuring..." dialog
+                                                    Navigator.pop(
+                                                        context), // Close the dialog
+                                                    // Close the dialog
+                                                    Future.delayed(
+                                                        Duration.zero, () {
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false, // Prevent closing manually
+                                                        builder: (context) {
+                                                          // Start measurement after build completes
+                                                          WidgetsBinding
+                                                              .instance
+                                                              .addPostFrameCallback(
+                                                                  (_) {
                                                             bluetooth
-                                                                .removeListener(
-                                                                    () {}); // Clean up
-                                                          }
-                                                        });
+                                                                .startSpo2Measurement(
+                                                              Provider.of<
+                                                                      SensorData>(
+                                                                  context,
+                                                                  listen:
+                                                                      false),
+                                                            );
+                                                          });
 
-                                                        return const AlertDialog(
-                                                          title: Text(
-                                                              "Measuring..."),
-                                                          content: SizedBox(
-                                                            height: 60,
-                                                            child: Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                          ),
-                                                        );
-                                                      },
-                                                    )
+                                                          // Set up a listener to close the dialog when measurement is done
+                                                          bluetooth
+                                                              .addListener(() {
+                                                            if (!bluetooth
+                                                                    .isMeasuring &&
+                                                                Navigator.canPop(
+                                                                    context)) {
+                                                              Navigator.pop(
+                                                                  context); // Close the "Measuring..." dialog
+                                                              bluetooth
+                                                                  .removeListener(
+                                                                      () {}); // Clean up
+                                                            }
+                                                          });
+
+                                                          return const AlertDialog(
+                                                            title: Text(
+                                                                "Measuring..."),
+                                                            content: SizedBox(
+                                                              height: 60,
+                                                              child: Center(
+                                                                  child:
+                                                                      CircularProgressIndicator()),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    })
                                                   },
                                                   child: const Text(
                                                     "Spo2",
@@ -361,51 +383,59 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                                 child: TextButton(
                                                   onPressed: () => {
-                                                    showDialog(
-                                                      context: context,
-                                                      barrierDismissible:
-                                                          false, // Prevent closing manually
-                                                      builder: (context) {
-                                                        // Start measurement after build completes
-                                                        WidgetsBinding.instance
-                                                            .addPostFrameCallback(
-                                                                (_) {
-                                                          bluetooth
-                                                              .startGSRMeasurement(
-                                                            Provider.of<
-                                                                    SensorData>(
-                                                                context,
-                                                                listen: false),
-                                                          );
-                                                        });
-
-                                                        // Set up a listener to close the dialog when measurement is done
-                                                        bluetooth
-                                                            .addListener(() {
-                                                          if (!bluetooth
-                                                                  .isMeasuring &&
-                                                              Navigator.canPop(
-                                                                  context)) {
-                                                            Navigator.pop(
-                                                                context); // Close the "Measuring..." dialog
+                                                    Navigator.pop(
+                                                        context), // Close the dialog
+                                                    // Close the dialog
+                                                    Future.delayed(
+                                                        Duration.zero, () {
+                                                      showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false, // Prevent closing manually
+                                                        builder: (context) {
+                                                          // Start measurement after build completes
+                                                          WidgetsBinding
+                                                              .instance
+                                                              .addPostFrameCallback(
+                                                                  (_) {
                                                             bluetooth
-                                                                .removeListener(
-                                                                    () {}); // Clean up
-                                                          }
-                                                        });
+                                                                .startGSRMeasurement(
+                                                              Provider.of<
+                                                                      SensorData>(
+                                                                  context,
+                                                                  listen:
+                                                                      false),
+                                                            );
+                                                          });
 
-                                                        return const AlertDialog(
-                                                          title: Text(
-                                                              "Measuring..."),
-                                                          content: SizedBox(
-                                                            height: 60,
-                                                            child: Center(
-                                                                child:
-                                                                    CircularProgressIndicator()),
-                                                          ),
-                                                        );
-                                                      },
-                                                    )
+                                                          // Set up a listener to close the dialog when measurement is done
+                                                          bluetooth
+                                                              .addListener(() {
+                                                            if (!bluetooth
+                                                                    .isMeasuring &&
+                                                                Navigator.canPop(
+                                                                    context)) {
+                                                              Navigator.pop(
+                                                                  context); // Close the "Measuring..." dialog
+                                                              bluetooth
+                                                                  .removeListener(
+                                                                      () {}); // Clean up
+                                                            }
+                                                          });
+
+                                                          return const AlertDialog(
+                                                            title: Text(
+                                                                "Measuring..."),
+                                                            content: SizedBox(
+                                                              height: 60,
+                                                              child: Center(
+                                                                  child:
+                                                                      CircularProgressIndicator()),
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    })
                                                   },
                                                   child: const Text(
                                                     "GSR",
@@ -430,48 +460,55 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                             child: TextButton(
                                               onPressed: () => {
-                                                showDialog(
-                                                  context: context,
-                                                  barrierDismissible:
-                                                      false, // Prevent closing manually
-                                                  builder: (context) {
-                                                    // Start measurement after build completes
-                                                    WidgetsBinding.instance
-                                                        .addPostFrameCallback(
-                                                            (_) {
-                                                      bluetooth
-                                                          .startBreathingMeasurement(
-                                                        Provider.of<SensorData>(
-                                                            context,
-                                                            listen: false),
+                                                Navigator.pop(
+                                                    context), // Close the dialog
+                                                // Close the dialog
+                                                Future.delayed(Duration.zero,
+                                                    () {
+                                                  showDialog(
+                                                    context: context,
+                                                    barrierDismissible:
+                                                        false, // Prevent closing manually
+                                                    builder: (context) {
+                                                      // Start measurement after build completes
+                                                      WidgetsBinding.instance
+                                                          .addPostFrameCallback(
+                                                              (_) {
+                                                        bluetooth
+                                                            .startBreathingMeasurement(
+                                                          Provider.of<
+                                                                  SensorData>(
+                                                              context,
+                                                              listen: false),
+                                                        );
+                                                      });
+
+                                                      // Set up a listener to close the dialog when measurement is done
+                                                      bluetooth.addListener(() {
+                                                        if (!bluetooth
+                                                                .isMeasuring &&
+                                                            Navigator.canPop(
+                                                                context)) {
+                                                          Navigator.pop(
+                                                              context); // Close the "Measuring..." dialog
+                                                          bluetooth.removeListener(
+                                                              () {}); // Clean up
+                                                        }
+                                                      });
+
+                                                      return const AlertDialog(
+                                                        title: Text(
+                                                            "Measuring..."),
+                                                        content: SizedBox(
+                                                          height: 60,
+                                                          child: Center(
+                                                              child:
+                                                                  CircularProgressIndicator()),
+                                                        ),
                                                       );
-                                                    });
-
-                                                    // Set up a listener to close the dialog when measurement is done
-                                                    bluetooth.addListener(() {
-                                                      if (!bluetooth
-                                                              .isMeasuring &&
-                                                          Navigator.canPop(
-                                                              context)) {
-                                                        Navigator.pop(
-                                                            context); // Close the "Measuring..." dialog
-                                                        bluetooth.removeListener(
-                                                            () {}); // Clean up
-                                                      }
-                                                    });
-
-                                                    return const AlertDialog(
-                                                      title:
-                                                          Text("Measuring..."),
-                                                      content: SizedBox(
-                                                        height: 60,
-                                                        child: Center(
-                                                            child:
-                                                                CircularProgressIndicator()),
-                                                      ),
-                                                    );
-                                                  },
-                                                )
+                                                    },
+                                                  );
+                                                })
                                               },
                                               child: const Text(
                                                 "Respiration",
