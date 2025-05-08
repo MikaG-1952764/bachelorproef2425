@@ -158,6 +158,7 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = true;
           print("Measurement started");
           readData(sensorData);
+          isMeasuring = false; // Stop the measurement after collecting data
           notifyListeners(); // Stop the measurement after collecting data
         }
       }
@@ -186,6 +187,7 @@ class Bluetooth with ChangeNotifier {
           readData(
             sensorData,
           );
+          isMeasuring = false;
           notifyListeners();
         }
       }
@@ -240,6 +242,7 @@ class Bluetooth with ChangeNotifier {
           readData(
             sensorData,
           );
+          isMeasuring = false;
           notifyListeners();
         }
       }
@@ -266,6 +269,7 @@ class Bluetooth with ChangeNotifier {
           newData = "GSR"; // Set the newData variable to "GSR"
           print("Measurement started");
           readData(sensorData);
+          isMeasuring = false;
           notifyListeners();
         }
       }
@@ -294,6 +298,7 @@ class Bluetooth with ChangeNotifier {
           readData(
             sensorData,
           );
+          isMeasuring = false;
           notifyListeners();
         }
       }
