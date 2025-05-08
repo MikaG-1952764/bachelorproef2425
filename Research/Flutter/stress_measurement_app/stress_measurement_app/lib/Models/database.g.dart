@@ -40,6 +40,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   late final GeneratedColumn<int> averageGSR = GeneratedColumn<int>(
       'average_g_s_r', aliasedName, true,
       type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _restingRespiratoryRateMeta =
+      const VerificationMeta('restingRespiratoryRate');
+  @override
+  late final GeneratedColumn<int> restingRespiratoryRate = GeneratedColumn<int>(
+      'resting_respiratory_rate', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -47,8 +53,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       'created_at', aliasedName, true,
       type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, maxHeartRate, averageHeartRate, averageGSR, createdAt];
+  List<GeneratedColumn> get $columns => [
+        id,
+        name,
+        maxHeartRate,
+        averageHeartRate,
+        averageGSR,
+        restingRespiratoryRate,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -86,6 +99,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           averageGSR.isAcceptableOrUnknown(
               data['average_g_s_r']!, _averageGSRMeta));
     }
+    if (data.containsKey('resting_respiratory_rate')) {
+      context.handle(
+          _restingRespiratoryRateMeta,
+          restingRespiratoryRate.isAcceptableOrUnknown(
+              data['resting_respiratory_rate']!, _restingRespiratoryRateMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -109,6 +128,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           .read(DriftSqlType.int, data['${effectivePrefix}average_heart_rate']),
       averageGSR: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}average_g_s_r']),
+      restingRespiratoryRate: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}resting_respiratory_rate']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
     );
@@ -126,6 +147,7 @@ class User extends DataClass implements Insertable<User> {
   final int? maxHeartRate;
   final int? averageHeartRate;
   final int? averageGSR;
+  final int? restingRespiratoryRate;
   final DateTime? createdAt;
   const User(
       {required this.id,
@@ -133,6 +155,7 @@ class User extends DataClass implements Insertable<User> {
       this.maxHeartRate,
       this.averageHeartRate,
       this.averageGSR,
+      this.restingRespiratoryRate,
       this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -147,6 +170,9 @@ class User extends DataClass implements Insertable<User> {
     }
     if (!nullToAbsent || averageGSR != null) {
       map['average_g_s_r'] = Variable<int>(averageGSR);
+    }
+    if (!nullToAbsent || restingRespiratoryRate != null) {
+      map['resting_respiratory_rate'] = Variable<int>(restingRespiratoryRate);
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -167,6 +193,9 @@ class User extends DataClass implements Insertable<User> {
       averageGSR: averageGSR == null && nullToAbsent
           ? const Value.absent()
           : Value(averageGSR),
+      restingRespiratoryRate: restingRespiratoryRate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(restingRespiratoryRate),
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
@@ -182,6 +211,8 @@ class User extends DataClass implements Insertable<User> {
       maxHeartRate: serializer.fromJson<int?>(json['maxHeartRate']),
       averageHeartRate: serializer.fromJson<int?>(json['averageHeartRate']),
       averageGSR: serializer.fromJson<int?>(json['averageGSR']),
+      restingRespiratoryRate:
+          serializer.fromJson<int?>(json['restingRespiratoryRate']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
     );
   }
@@ -194,6 +225,7 @@ class User extends DataClass implements Insertable<User> {
       'maxHeartRate': serializer.toJson<int?>(maxHeartRate),
       'averageHeartRate': serializer.toJson<int?>(averageHeartRate),
       'averageGSR': serializer.toJson<int?>(averageGSR),
+      'restingRespiratoryRate': serializer.toJson<int?>(restingRespiratoryRate),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
     };
   }
@@ -204,6 +236,7 @@ class User extends DataClass implements Insertable<User> {
           Value<int?> maxHeartRate = const Value.absent(),
           Value<int?> averageHeartRate = const Value.absent(),
           Value<int?> averageGSR = const Value.absent(),
+          Value<int?> restingRespiratoryRate = const Value.absent(),
           Value<DateTime?> createdAt = const Value.absent()}) =>
       User(
         id: id ?? this.id,
@@ -214,6 +247,9 @@ class User extends DataClass implements Insertable<User> {
             ? averageHeartRate.value
             : this.averageHeartRate,
         averageGSR: averageGSR.present ? averageGSR.value : this.averageGSR,
+        restingRespiratoryRate: restingRespiratoryRate.present
+            ? restingRespiratoryRate.value
+            : this.restingRespiratoryRate,
         createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
   User copyWithCompanion(UsersCompanion data) {
@@ -228,6 +264,9 @@ class User extends DataClass implements Insertable<User> {
           : this.averageHeartRate,
       averageGSR:
           data.averageGSR.present ? data.averageGSR.value : this.averageGSR,
+      restingRespiratoryRate: data.restingRespiratoryRate.present
+          ? data.restingRespiratoryRate.value
+          : this.restingRespiratoryRate,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -240,14 +279,15 @@ class User extends DataClass implements Insertable<User> {
           ..write('maxHeartRate: $maxHeartRate, ')
           ..write('averageHeartRate: $averageHeartRate, ')
           ..write('averageGSR: $averageGSR, ')
+          ..write('restingRespiratoryRate: $restingRespiratoryRate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, name, maxHeartRate, averageHeartRate, averageGSR, createdAt);
+  int get hashCode => Object.hash(id, name, maxHeartRate, averageHeartRate,
+      averageGSR, restingRespiratoryRate, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -257,6 +297,7 @@ class User extends DataClass implements Insertable<User> {
           other.maxHeartRate == this.maxHeartRate &&
           other.averageHeartRate == this.averageHeartRate &&
           other.averageGSR == this.averageGSR &&
+          other.restingRespiratoryRate == this.restingRespiratoryRate &&
           other.createdAt == this.createdAt);
 }
 
@@ -266,6 +307,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int?> maxHeartRate;
   final Value<int?> averageHeartRate;
   final Value<int?> averageGSR;
+  final Value<int?> restingRespiratoryRate;
   final Value<DateTime?> createdAt;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -273,6 +315,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.maxHeartRate = const Value.absent(),
     this.averageHeartRate = const Value.absent(),
     this.averageGSR = const Value.absent(),
+    this.restingRespiratoryRate = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -281,6 +324,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.maxHeartRate = const Value.absent(),
     this.averageHeartRate = const Value.absent(),
     this.averageGSR = const Value.absent(),
+    this.restingRespiratoryRate = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name);
   static Insertable<User> custom({
@@ -289,6 +333,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<int>? maxHeartRate,
     Expression<int>? averageHeartRate,
     Expression<int>? averageGSR,
+    Expression<int>? restingRespiratoryRate,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -297,6 +342,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (maxHeartRate != null) 'max_heart_rate': maxHeartRate,
       if (averageHeartRate != null) 'average_heart_rate': averageHeartRate,
       if (averageGSR != null) 'average_g_s_r': averageGSR,
+      if (restingRespiratoryRate != null)
+        'resting_respiratory_rate': restingRespiratoryRate,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -307,6 +354,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<int?>? maxHeartRate,
       Value<int?>? averageHeartRate,
       Value<int?>? averageGSR,
+      Value<int?>? restingRespiratoryRate,
       Value<DateTime?>? createdAt}) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -314,6 +362,8 @@ class UsersCompanion extends UpdateCompanion<User> {
       maxHeartRate: maxHeartRate ?? this.maxHeartRate,
       averageHeartRate: averageHeartRate ?? this.averageHeartRate,
       averageGSR: averageGSR ?? this.averageGSR,
+      restingRespiratoryRate:
+          restingRespiratoryRate ?? this.restingRespiratoryRate,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -336,6 +386,10 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (averageGSR.present) {
       map['average_g_s_r'] = Variable<int>(averageGSR.value);
     }
+    if (restingRespiratoryRate.present) {
+      map['resting_respiratory_rate'] =
+          Variable<int>(restingRespiratoryRate.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -350,6 +404,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('maxHeartRate: $maxHeartRate, ')
           ..write('averageHeartRate: $averageHeartRate, ')
           ..write('averageGSR: $averageGSR, ')
+          ..write('restingRespiratoryRate: $restingRespiratoryRate, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1706,6 +1761,7 @@ typedef $$UsersTableCreateCompanionBuilder = UsersCompanion Function({
   Value<int?> maxHeartRate,
   Value<int?> averageHeartRate,
   Value<int?> averageGSR,
+  Value<int?> restingRespiratoryRate,
   Value<DateTime?> createdAt,
 });
 typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
@@ -1714,6 +1770,7 @@ typedef $$UsersTableUpdateCompanionBuilder = UsersCompanion Function({
   Value<int?> maxHeartRate,
   Value<int?> averageHeartRate,
   Value<int?> averageGSR,
+  Value<int?> restingRespiratoryRate,
   Value<DateTime?> createdAt,
 });
 
@@ -1818,6 +1875,10 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<int> get averageGSR => $composableBuilder(
       column: $table.averageGSR, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get restingRespiratoryRate => $composableBuilder(
+      column: $table.restingRespiratoryRate,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -1954,6 +2015,10 @@ class $$UsersTableOrderingComposer
   ColumnOrderings<int> get averageGSR => $composableBuilder(
       column: $table.averageGSR, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get restingRespiratoryRate => $composableBuilder(
+      column: $table.restingRespiratoryRate,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -1981,6 +2046,9 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<int> get averageGSR => $composableBuilder(
       column: $table.averageGSR, builder: (column) => column);
+
+  GeneratedColumn<int> get restingRespiratoryRate => $composableBuilder(
+      column: $table.restingRespiratoryRate, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2124,6 +2192,7 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<int?> maxHeartRate = const Value.absent(),
             Value<int?> averageHeartRate = const Value.absent(),
             Value<int?> averageGSR = const Value.absent(),
+            Value<int?> restingRespiratoryRate = const Value.absent(),
             Value<DateTime?> createdAt = const Value.absent(),
           }) =>
               UsersCompanion(
@@ -2132,6 +2201,7 @@ class $$UsersTableTableManager extends RootTableManager<
             maxHeartRate: maxHeartRate,
             averageHeartRate: averageHeartRate,
             averageGSR: averageGSR,
+            restingRespiratoryRate: restingRespiratoryRate,
             createdAt: createdAt,
           ),
           createCompanionCallback: ({
@@ -2140,6 +2210,7 @@ class $$UsersTableTableManager extends RootTableManager<
             Value<int?> maxHeartRate = const Value.absent(),
             Value<int?> averageHeartRate = const Value.absent(),
             Value<int?> averageGSR = const Value.absent(),
+            Value<int?> restingRespiratoryRate = const Value.absent(),
             Value<DateTime?> createdAt = const Value.absent(),
           }) =>
               UsersCompanion.insert(
@@ -2148,6 +2219,7 @@ class $$UsersTableTableManager extends RootTableManager<
             maxHeartRate: maxHeartRate,
             averageHeartRate: averageHeartRate,
             averageGSR: averageGSR,
+            restingRespiratoryRate: restingRespiratoryRate,
             createdAt: createdAt,
           ),
           withReferenceMapper: (p0) => p0

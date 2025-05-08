@@ -15,6 +15,7 @@ class Users extends Table {
   IntColumn get maxHeartRate => integer().nullable()();
   IntColumn get averageHeartRate => integer().nullable()();
   IntColumn get averageGSR => integer().nullable()();
+  IntColumn get restingRespiratoryRate => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
@@ -128,6 +129,15 @@ class AppDatabase extends _$AppDatabase {
     return result?.averageGSR;
   }
 
+  Future<int?> getCurrentUserRestingRespirationRate() async {
+    if (userId == null) return null;
+
+    final result = await (select(users)..where((u) => u.id.equals(userId!)))
+        .getSingleOrNull();
+
+    return result?.restingRespiratoryRate;
+  }
+
   Future<bool> updateAverageHeartRate(int measuredAverageHeartRate) async {
     if (userId == null) {
       print("User ID is null. Cannot update average heart rate.");
@@ -151,6 +161,19 @@ class AppDatabase extends _$AppDatabase {
         await (update(users)..where((u) => u.id.equals(userId!))).write(
       UsersCompanion(
         averageGSR: Value(measuredAverageGSR),
+      ),
+    );
+    return rowsUpdated > 0;
+  }
+
+  Future<bool> updateRestingRespiratoryRate(
+      int measuredRestingRespiratoryRate) async {
+    if (userId == null) return false;
+
+    final rowsUpdated =
+        await (update(users)..where((u) => u.id.equals(userId!))).write(
+      UsersCompanion(
+        restingRespiratoryRate: Value(measuredRestingRespiratoryRate),
       ),
     );
     return rowsUpdated > 0;

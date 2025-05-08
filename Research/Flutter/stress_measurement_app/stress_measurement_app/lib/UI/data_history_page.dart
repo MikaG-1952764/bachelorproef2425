@@ -374,7 +374,6 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               maxY: _getMaxY(widget.pageName),
                             ),
                           );
-                          ;
                         },
                       ),
                     ),
@@ -464,7 +463,6 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               maxY: _getMaxY(widget.pageName),
                             ),
                           );
-                          ;
                         },
                       ),
                     ),
@@ -525,7 +523,6 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     final readings = snapshot.data!;
                     return Column(
                       children: readings.asMap().entries.map((entry) {
-                        final index = entry.key + 1;
                         final reading = entry.value;
                         return DataRowMinMaxWidget(
                           date: _formatDate(reading['day']),

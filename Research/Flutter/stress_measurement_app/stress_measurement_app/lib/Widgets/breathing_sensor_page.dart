@@ -1,8 +1,5 @@
-import 'dart:math';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
-import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/UI/data_history_page.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
@@ -18,20 +15,6 @@ class BreathingSensorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> generateBreathingGraph(int breathsPerMinute) {
-      List<FlSpot> points = [];
-      double secondsPerBreath = 60 / breathsPerMinute;
-      double totalTime = 20.0;
-      double step = 0.1; // smaller = smoother curve
-
-      for (double t = 0; t <= totalTime; t += step) {
-        double phase = 2 * pi * (t % secondsPerBreath) / secondsPerBreath;
-        double y = sin(phase); // breathing up/down
-        points.add(FlSpot(t, y));
-      }
-      return points;
-    }
-
     return Column(
       children: [
         const SizedBox(height: 10),

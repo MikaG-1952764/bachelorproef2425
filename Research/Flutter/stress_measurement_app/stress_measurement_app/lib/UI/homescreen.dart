@@ -389,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 500,
+                    height: 560,
                     width: 350,
                     child: PagerWidget(controller: pageController, pages: [
                       Container(
@@ -410,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontWeight: FontWeight.bold)),
                               SizedBox(height: 40),
                               Text(
-                                "As a new user a configuration for the heart rate and GSR is needed. In this step your average heart rate and GSR will be measured to later make the right assesments. Please make sure that the device is connected to the app.",
+                                "As a new user a configuration for the heart rate, repiration rate and GSR is needed. In this step your average heart rate and GSR will be measured to later make the right assesments. Please make sure that the device is connected to the app.",
                                 style: TextStyle(
                                   fontSize: 20,
                                 ),
@@ -431,7 +431,33 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             children: [
                               SizedBox(height: 10),
-                              Text("Step 1: GSR sensor ",
+                              Text("Step 1: Respiration rate sensor ",
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 20),
+                              Text(
+                                  "Place the sensor securely around your chest. Make sure it fits snugly but is still comfortable.\n\n When doing the measurement, sit down comfortably. Try to remain still during the calibration process and breath normally. There is no need to change your breathing pattern. \n\n The respiratory rate sensor will measure for a minute to get your respiratory rate while resting.",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(color: Colors.black, width: 3),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10),
+                              Text("Step 2: GSR sensor ",
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold)),
@@ -457,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             children: [
                               const SizedBox(height: 10),
-                              const Text("Step 2: Heart rate sensor",
+                              const Text("Step 3: Heart rate sensor",
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold)),
@@ -467,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   style: TextStyle(
                                     fontSize: 20,
                                   )),
-                              const SizedBox(height: 50),
+                              const SizedBox(height: 70),
                               SizedBox(
                                 width: 200,
                                 height: 60,
@@ -496,15 +522,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         barrierDismissible: false,
                                         builder: (BuildContext context) =>
                                             const AlertDialog(
-                                          title: Text("Measuring"),
+                                          title: Text("Configuring values"),
                                           content: Text(
-                                              "Measuring average heart rate and GSR..."),
+                                              "Measuring resting respiratory rate, average heart rate and GSR... \n\n This may take a few minutes. Please wait."),
                                         ),
                                       );
                                       final avgHeartRate =
                                           await bluetooth.getAverageHeartRate();
                                       final avgGSR =
                                           await bluetooth.getAverageGSR();
+                                      final restingRespirationRate =
+                                          await bluetooth
+                                              .getRestingRespiration();
 
                                       bluetooth
                                           .getDatabase()
@@ -512,6 +541,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       bluetooth
                                           .getDatabase()
                                           .updateAverageGSR(avgGSR);
+                                      bluetooth
+                                          .getDatabase()
+                                          .updateRestingRespiratoryRate(
+                                              restingRespirationRate);
                                       if (context.mounted) {
                                         Navigator.pop(context);
                                         showDialog(
@@ -520,9 +553,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             builder: (BuildContext context) =>
                                                 AlertDialog(
                                                     title: const Text(
-                                                        "Measurement complete"),
+                                                        "Configuration complete"),
                                                     content: const Text(
-                                                        "All averages are measured. Press the 'home' button to go to the homescreen."),
+                                                        "All values are measured. Press the 'home' button to go to the homescreen."),
                                                     actions: [
                                                       FloatingActionButton(
                                                         onPressed: () async {
@@ -543,14 +576,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         child: const SizedBox(
                                                             height: 40,
                                                             width: 140,
-                                                            child:
-                                                                Text("Home")),
+                                                            child: Center(
+                                                                child: Text(
+                                                                    "Home"))),
                                                       ),
                                                     ]));
                                       }
                                     }
                                   },
-                                  child: const Text("Start measurement"),
+                                  child: const Text("Start configuration"),
                                 ),
                               ),
                             ],
@@ -563,7 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: SmoothPageIndicator(
                       controller: pageController,
-                      count: 3,
+                      count: 4,
                       effect: const WormEffect(
                           activeDotColor: Colors
                               .black), // or JumpingDotEffect, ExpandingDotsEffect etc.

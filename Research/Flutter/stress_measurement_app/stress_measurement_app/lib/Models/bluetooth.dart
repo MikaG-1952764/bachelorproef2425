@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart' as fbp;
@@ -477,7 +479,7 @@ class Bluetooth with ChangeNotifier {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           int validMeasurements = 0;
           List<int> heartRateValues = [];
-          while (validMeasurements <= 6) {
+          while (validMeasurements < 10) {
             print("Sending START HEART command...");
             await characteristic.write(utf8.encode("START HEART"),
                 withoutResponse: false);
@@ -512,6 +514,58 @@ class Bluetooth with ChangeNotifier {
     throw Exception("Unable to calculate average heart rate");
   }
 
+  Future<int> getRestingRespiration() async {
+    if (connectedDevice == null) {
+      print("No device connected");
+      notifyListeners();
+      return 0;
+    }
+
+    SensorData sensorData =
+        SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0);
+
+    List<fbp.BluetoothService> services =
+        await connectedDevice!.discoverServices();
+    for (var service in services) {
+      for (var characteristic in service.characteristics) {
+        if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
+          int validMeasurements = 0;
+          SensorData endData =
+              SensorData(heartRate: 0, spo2: 0, gsr: 0, breathingRate: 0);
+          while (validMeasurements < 1) {
+            print("Sending START BREATHING command...");
+            await characteristic.write(utf8.encode("START BREATHING"),
+                withoutResponse: false);
+            print("Measurement started");
+
+            sensorData.setData(0, 0, 0, 0);
+            // Wait for the data to come back before proceeding
+            await Future.delayed(const Duration(seconds: 61));
+            SensorData data = await readSingleData(sensorData);
+
+            if (data.breathingRate > 4 && data.breathingRate < 18) {
+              validMeasurements++;
+              endData = data;
+              print(
+                  "Valid respiration data received: ${data.heartRate}, $validMeasurements");
+              break;
+            } else {
+              print("Invalid respiration data received: ${data.breathingRate}");
+            }
+
+            await Future.delayed(const Duration(seconds: 1));
+            // Wait 1 second before next attempt
+          }
+          stopMeasurement(); // Stop the measurement after collecting data
+          // Return the average after collecting enough valid data
+          return endData.breathingRate;
+        }
+      }
+    }
+    print("START command characteristic not found");
+    throw Exception("Unable to measure breathing rate");
+  }
+
   Future<int> getAverageGSR() async {
     if (connectedDevice == null) {
       print("No device connected");
@@ -529,7 +583,7 @@ class Bluetooth with ChangeNotifier {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           int validMeasurements = 0;
           List<int> GSRValues = [];
-          while (validMeasurements <= 6) {
+          while (validMeasurements < 10) {
             print("Sending START GSR command...");
             await characteristic.write(utf8.encode("START GSR"),
                 withoutResponse: false); // Set the newData variable to "GSR"
