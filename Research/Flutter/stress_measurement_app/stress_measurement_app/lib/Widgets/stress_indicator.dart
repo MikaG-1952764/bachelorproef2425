@@ -39,7 +39,7 @@ class StressIndicator extends StatelessWidget {
         latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.30)) {
       return "Stressed";
     } else if (latestGsrValue >= (1.05 * averageGsrValue!) ||
-        latestRespiratoryRate! >= restingRepsiratoryRate! * 1.20) {
+        latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.20)) {
       return "Moderately Stressed";
     }
     return "No stress detected";
@@ -49,11 +49,12 @@ class StressIndicator extends StatelessWidget {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
     final latestRespiratoryRate = await respiratoryRate();
+    final restingRepsiratoryRate = await restingRespiratory();
     if (latestGsrValue >= (1.10 * averageGsrValue!) ||
-        latestRespiratoryRate! >= 16) {
+        latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.30)) {
       return Colors.red;
     } else if (latestGsrValue >= (1.05 * averageGsrValue!) ||
-        latestRespiratoryRate! >= 14) {
+        latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.20)) {
       return Colors.orange;
     }
     return Colors.green;
