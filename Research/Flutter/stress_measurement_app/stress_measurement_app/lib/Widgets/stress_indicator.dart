@@ -32,6 +32,9 @@ class StressIndicator extends StatelessWidget {
     final latestRespiratoryRate = await respiratoryRate();
     final restingRepsiratoryRate = await restingRespiratory();
 
+    print(restingRepsiratoryRate);
+    print(latestRespiratoryRate);
+
     if (latestGsrValue >= (1.10 * averageGsrValue!) ||
         latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.30)) {
       return "Stressed";
@@ -46,11 +49,11 @@ class StressIndicator extends StatelessWidget {
     final latestGsrValue = await latestGSR();
     final averageGsrValue = await averageGsr();
     final latestRespiratoryRate = await respiratoryRate();
-    if (latestGsrValue > (0.10 * averageGsrValue!) ||
-        latestRespiratoryRate! > 16) {
+    if (latestGsrValue >= (1.10 * averageGsrValue!) ||
+        latestRespiratoryRate! >= 16) {
       return Colors.red;
-    } else if (latestGsrValue > (0.05 * averageGsrValue!) ||
-        latestRespiratoryRate! > 14) {
+    } else if (latestGsrValue >= (1.05 * averageGsrValue!) ||
+        latestRespiratoryRate! >= 14) {
       return Colors.orange;
     }
     return Colors.green;
@@ -85,7 +88,7 @@ class StressIndicator extends StatelessWidget {
                         builder: (BuildContext context) => AlertDialog(
                           title: const Text("Stress level"),
                           content: SizedBox(
-                            height: 370,
+                            height: 420,
                             child: Column(
                               children: [
                                 const Text(
