@@ -171,21 +171,27 @@ class Bluetooth with ChangeNotifier {
       notifyListeners();
     }
 
+    bool validMeasurement = false;
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
-          print("Sending START HEART command...");
-          await characteristic.write(utf8.encode("START HEART"),
-              withoutResponse: false);
-          isMeasuring = true;
-          newData = "HR"; // Set the newData variable to "HR"
-          print("Measurement started");
-          readData(
-            sensorData,
-          );
+          while (validMeasurement == false) {
+            print("Sending START HEART command...");
+            await characteristic.write(utf8.encode("START HEART"),
+                withoutResponse: false);
+            isMeasuring = true;
+            newData = "HR"; // Set the newData variable to "HR"
+            print("Measurement started");
+            await readData(
+              sensorData,
+            );
+            if (sensorData.heartRate != -999) {
+              validMeasurement = true;
+            }
+          }
           notifyListeners();
         }
       }
@@ -223,23 +229,28 @@ class Bluetooth with ChangeNotifier {
       print("No device connected");
       notifyListeners();
     }
-
+    bool validMeasurement = false;
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
-          print("Sending START SPO2 command...");
-          await characteristic.write(utf8.encode("START SPO2"),
-              withoutResponse: false);
-          isMeasuring = true;
-          newData = "SpO2"; // Set the newData variable to "SpO2"
-          print("Measurement started");
-          print("In spo2 meaurement");
-          readData(
-            sensorData,
-          );
+          while (validMeasurement == false) {
+            print("Sending START SPO2 command...");
+            await characteristic.write(utf8.encode("START SPO2"),
+                withoutResponse: false);
+            isMeasuring = true;
+            newData = "SpO2"; // Set the newData variable to "SpO2"
+            print("Measurement started");
+            print("In spo2 meaurement");
+            await readData(
+              sensorData,
+            );
+            if (sensorData.spo2 != -999) {
+              validMeasurement = true;
+            }
+          }
           notifyListeners();
         }
       }
@@ -278,7 +289,6 @@ class Bluetooth with ChangeNotifier {
       print("No device connected");
       notifyListeners();
     }
-
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
@@ -291,9 +301,15 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = true;
           newData = "Breathing"; // Set the newData variable to "HR"
           print("Measurement started");
-          readData(
+          await readData(
             sensorData,
           );
+          if (sensorData.spo2 == -999) {
+            await startSpo2Measurement(sensorData);
+          }
+          if (sensorData.heartRate == -999) {
+            await startHeartMeasurement(sensorData);
+          }
           notifyListeners();
         }
       }
