@@ -70,6 +70,11 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
     return readings.isNotEmpty ? readings.first['respiratoryRate'] : 0;
   }
 
+  Future<int> getMaxHeartRate() async {
+    final maxHeartRate = await database.getCurrentUserMaxHeartRate();
+    return maxHeartRate ?? 0; // Return 0 if maxHeartRate is null
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -202,9 +207,16 @@ class _SensorCardsPagerState extends State<SensorCardsPager> {
                           maxValue: widget.maxHeartValue,
                           bluetooth: widget.bluetooth,
                         )
-                      : HeartRateGauge(
-                          heartRate: heartRate,
-                          bluetooth: widget.bluetooth,
+                      : FutureBuilder<int>(
+                          future: getMaxHeartRate(),
+                          builder: (context, snapshot) {
+                            final maxHeartRate = snapshot.data ?? 0;
+                            return HeartRateGauge(
+                              heartRate: heartRate,
+                              maxValue: maxHeartRate.toDouble(),
+                              bluetooth: widget.bluetooth,
+                            );
+                          },
                         ),
                 ),
               ],
