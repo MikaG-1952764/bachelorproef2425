@@ -83,6 +83,23 @@ class ConfiguringPage extends StatelessWidget {
                 width: 100,
                 child: FloatingActionButton(
                   onPressed: () {
+                    // Get the values from the controllers
+                    const min = -1.0;
+                    const max = -1.0;
+
+                    // Return the values back to the previous screen
+                    Navigator.pop(context, {'min': min, 'max': max});
+                  },
+                  child: const Text("Reset"),
+                ),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              SizedBox(
+                width: 100,
+                child: FloatingActionButton(
+                  onPressed: () {
                     Navigator.pop(context);
                   },
                   child: const Text("Cancel"),
