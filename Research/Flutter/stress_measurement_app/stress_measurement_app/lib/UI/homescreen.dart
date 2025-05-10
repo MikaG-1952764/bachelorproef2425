@@ -636,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontWeight: FontWeight.bold)),
                               SizedBox(height: 40),
                               Text(
-                                "As a new user a configuration for the heart rate, repiration rate and GSR is needed. In this step your average heart rate and GSR will be measured to later make the right assesments. Please make sure that the device is connected to the app.",
+                                "As a new user a configuration for the heart rate, respiration rate and GSR is needed. In this step your average heart rate and GSR will be measured to later make the right assessments. Please make sure that the device is connected to the app.",
                                 style: TextStyle(
                                   fontSize: 20,
                                 ),
@@ -689,7 +689,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       fontWeight: FontWeight.bold)),
                               SizedBox(height: 20),
                               Text(
-                                  "The GSR sensor measures the electrical conductance of the skin (how much sweat is on the skin). This is a good indicator of stress. Take the two wrappers and place them on the index and middle finger. After the measurement is started, the sensor will measure your GSR until it has enough data to take an average reading from.",
+                                  "The GSR sensor measures the electrical conductance of the skin (how much sweat is on the skin). This is a good indicator of stress. Take the two wrappers (sensor pads) and place them on the index and middle finger. After the measurement is started, the sensor will measure your GSR until it has enough data to take an average reading from.",
                                   style: TextStyle(
                                     fontSize: 20,
                                   )),
