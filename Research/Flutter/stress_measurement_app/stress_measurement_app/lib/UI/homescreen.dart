@@ -584,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 148, 204, 250),
       appBar: AppBar(
-        title: const Text("Cofiguring new user"),
+        title: const Text("Configuring new user"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back), // Standard back arrow
           onPressed: () {
