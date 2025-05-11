@@ -338,9 +338,22 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                       borderRadius: BorderRadius.zero,
                                     )
                                   ],
-                                  showingTooltipIndicators: [0],
                                 );
                               }).toList(),
+                              barTouchData: BarTouchData(
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipItem:
+                                      (group, groupIndex, rod, rodIndex) {
+                                    final reading = data[groupIndex];
+                                    return BarTooltipItem(
+                                      'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
+                                      const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    );
+                                  },
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
@@ -427,9 +440,22 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                       borderRadius: BorderRadius.zero,
                                     )
                                   ],
-                                  showingTooltipIndicators: [0],
                                 );
                               }).toList(),
+                              barTouchData: BarTouchData(
+                                touchTooltipData: BarTouchTooltipData(
+                                  getTooltipItem:
+                                      (group, groupIndex, rod, rodIndex) {
+                                    final reading = data[groupIndex];
+                                    return BarTooltipItem(
+                                      'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
+                                      const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    );
+                                  },
+                                ),
+                              ),
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
@@ -659,7 +685,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return 1000; // Example, adjust based on your GSR data range
       case "Spo2":
-        return 0; // Example, adjust based on your SpO2 data range
+        return 0;
+      case "RespitoryRate":
+        return 4; // Example, adjust based on your SpO2 data range
       default:
         return null; // Default minY
     }
@@ -672,7 +700,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return 2500; // Example, adjust based on your GSR data range
       case "Spo2":
-        return 140; // Example, adjust based on your SpO2 data range
+        return 140;
+      case "RespitoryRate":
+        return 30; // Example, adjust based on your SpO2 data range
       default:
         return null; // Default maxY
     }
