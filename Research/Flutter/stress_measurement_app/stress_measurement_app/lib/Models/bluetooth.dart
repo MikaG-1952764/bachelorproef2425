@@ -171,27 +171,21 @@ class Bluetooth with ChangeNotifier {
       notifyListeners();
     }
 
-    bool validMeasurement = false;
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
-          while (validMeasurement == false) {
-            print("Sending START HEART command...");
-            await characteristic.write(utf8.encode("START HEART"),
-                withoutResponse: false);
-            isMeasuring = true;
-            newData = "HR"; // Set the newData variable to "HR"
-            print("Measurement started");
-            await readData(
-              sensorData,
-            );
-            if (sensorData.heartRate != -999) {
-              validMeasurement = true;
-            }
-          }
+          print("Sending START HEART command...");
+          await characteristic.write(utf8.encode("START HEART"),
+              withoutResponse: false);
+          isMeasuring = true;
+          newData = "HR"; // Set the newData variable to "HR"
+          print("Measurement started");
+          await readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -229,28 +223,24 @@ class Bluetooth with ChangeNotifier {
       print("No device connected");
       notifyListeners();
     }
-    bool validMeasurement = false;
+
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
-          while (validMeasurement == false) {
-            print("Sending START SPO2 command...");
-            await characteristic.write(utf8.encode("START SPO2"),
-                withoutResponse: false);
-            isMeasuring = true;
-            newData = "SpO2"; // Set the newData variable to "SpO2"
-            print("Measurement started");
-            print("In spo2 meaurement");
-            await readData(
-              sensorData,
-            );
-            if (sensorData.spo2 != -999) {
-              validMeasurement = true;
-            }
-          }
+
+          print("Sending START SPO2 command...");
+          await characteristic.write(utf8.encode("START SPO2"),
+              withoutResponse: false);
+          isMeasuring = true;
+          newData = "SpO2"; // Set the newData variable to "SpO2"
+          print("Measurement started");
+          print("In spo2 meaurement");
+          await readData(
+            sensorData,
+          );
           notifyListeners();
         }
       }
@@ -304,12 +294,6 @@ class Bluetooth with ChangeNotifier {
           await readData(
             sensorData,
           );
-          if (sensorData.spo2 == -999) {
-            await startSpo2Measurement(sensorData);
-          }
-          if (sensorData.heartRate == -999) {
-            await startHeartMeasurement(sensorData);
-          }
           notifyListeners();
         }
       }
@@ -357,18 +341,17 @@ class Bluetooth with ChangeNotifier {
                 switch (newData) {
                   case "HR":
                     print("in case hr");
+                    sensorData.setHeartData(hr);
                     if (hr != -999) {
-                      sensorData.setHeartData(hr);
                       appDatabase.insertHeartRate(hr);
                     }
-                    // Save heart rate to database
                     newData =
                         "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
                     print("in case spo2");
+                    sensorData.setSpo2Data(spo2);
                     if (spo2 != -999) {
-                      sensorData.setSpo2Data(spo2);
                       appDatabase.insertSpo2(spo2);
                     }
                     newData = "all"; // Reset to all after SpO2 measurement
@@ -388,11 +371,16 @@ class Bluetooth with ChangeNotifier {
                   default:
                     print("in case all");
                     sensorData.setData(hr, spo2, gsr, breathingRate);
-                    appDatabase.insertHeartRate(hr);
-                    appDatabase.insertSpo2(spo2);
-                    appDatabase.insertGSR(gsr);
-                    appDatabase.insertRespitoryRate(breathingRate);
-                    break;
+                    if (hr != -999 && spo2 != -999) {
+                      appDatabase.insertHeartRate(hr);
+                      appDatabase.insertSpo2(spo2);
+                      appDatabase.insertGSR(gsr);
+                      appDatabase.insertRespitoryRate(breathingRate);
+                      break;
+                    } else {
+                      appDatabase.insertGSR(gsr);
+                      appDatabase.insertRespitoryRate(breathingRate);
+                    }
                 }
 
                 print(
