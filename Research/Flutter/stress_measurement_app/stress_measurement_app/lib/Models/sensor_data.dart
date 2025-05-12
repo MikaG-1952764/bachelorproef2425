@@ -14,11 +14,6 @@ class SensorData extends ChangeNotifier {
 
   void setData(int newHR, int newSpo2, int newGSR, newBreathingRate) {
     heartRate = newHR;
-    if (newSpo2 >= 0 && newSpo2 <= 100) {
-      spo2 = newSpo2;
-    } else {
-      spo2 = spo2;
-    }
     spo2 = newSpo2;
     gsr = newGSR;
     breathingRate = newBreathingRate;
@@ -29,17 +24,15 @@ class SensorData extends ChangeNotifier {
     heartRate = newHR;
     gsr = gsr;
     spo2 = spo2;
+    breathingRate = breathingRate;
     notifyListeners();
   }
 
   void setSpo2Data(int newSpo2) {
-    if (newSpo2 >= 0 && newSpo2 <= 100) {
-      spo2 = newSpo2;
-    } else {
-      spo2 = spo2;
-    }
+    spo2 = newSpo2;
     gsr = gsr;
     heartRate = heartRate;
+    breathingRate = breathingRate;
     notifyListeners();
   }
 
@@ -47,6 +40,7 @@ class SensorData extends ChangeNotifier {
     gsr = newGSR;
     heartRate = heartRate;
     spo2 = spo2;
+    breathingRate = breathingRate;
     notifyListeners();
   }
 

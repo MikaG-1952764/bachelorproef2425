@@ -183,7 +183,7 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = true;
           newData = "HR"; // Set the newData variable to "HR"
           print("Measurement started");
-          readData(
+          await readData(
             sensorData,
           );
           notifyListeners();
@@ -230,6 +230,7 @@ class Bluetooth with ChangeNotifier {
       for (var characteristic in service.characteristics) {
         if (characteristic.uuid.toString().toLowerCase().contains("2a6f")) {
           // Command Characteristic
+
           print("Sending START SPO2 command...");
           await characteristic.write(utf8.encode("START SPO2"),
               withoutResponse: false);
@@ -237,7 +238,7 @@ class Bluetooth with ChangeNotifier {
           newData = "SpO2"; // Set the newData variable to "SpO2"
           print("Measurement started");
           print("In spo2 meaurement");
-          readData(
+          await readData(
             sensorData,
           );
           notifyListeners();
@@ -278,7 +279,6 @@ class Bluetooth with ChangeNotifier {
       print("No device connected");
       notifyListeners();
     }
-
     List<fbp.BluetoothService> services =
         await connectedDevice!.discoverServices();
     for (var service in services) {
@@ -291,7 +291,7 @@ class Bluetooth with ChangeNotifier {
           isMeasuring = true;
           newData = "Breathing"; // Set the newData variable to "HR"
           print("Measurement started");
-          readData(
+          await readData(
             sensorData,
           );
           notifyListeners();
@@ -341,18 +341,17 @@ class Bluetooth with ChangeNotifier {
                 switch (newData) {
                   case "HR":
                     print("in case hr");
+                    sensorData.setHeartData(hr);
                     if (hr != -999) {
-                      sensorData.setHeartData(hr);
                       appDatabase.insertHeartRate(hr);
                     }
-                    // Save heart rate to database
                     newData =
                         "all"; // Reset to all after heart rate measurement
                     break;
                   case "SpO2":
                     print("in case spo2");
+                    sensorData.setSpo2Data(spo2);
                     if (spo2 != -999) {
-                      sensorData.setSpo2Data(spo2);
                       appDatabase.insertSpo2(spo2);
                     }
                     newData = "all"; // Reset to all after SpO2 measurement
@@ -372,11 +371,16 @@ class Bluetooth with ChangeNotifier {
                   default:
                     print("in case all");
                     sensorData.setData(hr, spo2, gsr, breathingRate);
-                    appDatabase.insertHeartRate(hr);
-                    appDatabase.insertSpo2(spo2);
-                    appDatabase.insertGSR(gsr);
-                    appDatabase.insertRespitoryRate(breathingRate);
-                    break;
+                    if (hr != -999 && spo2 != -999) {
+                      appDatabase.insertHeartRate(hr);
+                      appDatabase.insertSpo2(spo2);
+                      appDatabase.insertGSR(gsr);
+                      appDatabase.insertRespitoryRate(breathingRate);
+                      break;
+                    } else {
+                      appDatabase.insertGSR(gsr);
+                      appDatabase.insertRespitoryRate(breathingRate);
+                    }
                 }
 
                 print(

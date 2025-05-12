@@ -147,6 +147,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     actions: [
                                       Column(
                                         children: [
+                                          const Text(
+                                              "Grab the right sensor and press the parameter you want to measure"),
+                                          const SizedBox(
+                                            height: 60,
+                                          ),
                                           Row(
                                             children: [
                                               const Spacer(),
@@ -159,9 +164,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   color: Colors.blue,
                                                 ),
                                                 child: TextButton(
-                                                  onPressed: () => {
+                                                  onPressed: () {
                                                     Navigator.pop(
-                                                        context), // Close the dialog
+                                                        context); // Close the current dialog
                                                     Future.delayed(
                                                         Duration.zero, () {
                                                       showDialog(
@@ -191,8 +196,52 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     .isMeasuring &&
                                                                 Navigator.canPop(
                                                                     context)) {
-                                                              Navigator.pop(
-                                                                  context); // Close the "Measuring..." dialog
+                                                              final sensorData =
+                                                                  Provider.of<
+                                                                          SensorData>(
+                                                                      context,
+                                                                      listen:
+                                                                          false);
+                                                              if (sensorData
+                                                                          .heartRate ==
+                                                                      -999 ||
+                                                                  sensorData
+                                                                          .spo2 ==
+                                                                      -999) {
+                                                                // Measurement failed
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                                showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  barrierDismissible:
+                                                                      false,
+                                                                  builder:
+                                                                      (context) =>
+                                                                          AlertDialog(
+                                                                    title: const Text(
+                                                                        "Measurement Failed"),
+                                                                    content:
+                                                                        const Text(
+                                                                            "Heart rate or SpO2 measurement failed. Please measure these parameters separate."),
+                                                                    actions: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context); // Close the "Measurement Failed" dialog
+                                                                        },
+                                                                        child: const Text(
+                                                                            "OK"),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                // Measurement succeeded, close the dialog
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                              }
                                                               bluetooth
                                                                   .removeListener(
                                                                       () {}); // Clean up
@@ -211,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           );
                                                         },
                                                       );
-                                                    })
+                                                    });
                                                   },
                                                   child: const Text(
                                                     "All",
@@ -230,10 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   color: Colors.blue,
                                                 ),
                                                 child: TextButton(
-                                                  onPressed: () => {
+                                                  onPressed: () {
                                                     Navigator.pop(
-                                                        context), // Close the dialog
-                                                    // Close the dialog
+                                                        context); // Close the current dialog
                                                     Future.delayed(
                                                         Duration.zero, () {
                                                       showDialog(
@@ -263,8 +311,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     .isMeasuring &&
                                                                 Navigator.canPop(
                                                                     context)) {
-                                                              Navigator.pop(
-                                                                  context); // Close the "Measuring..." dialog
+                                                              if (Provider.of<SensorData>(
+                                                                          context,
+                                                                          listen:
+                                                                              false)
+                                                                      .heartRate ==
+                                                                  -999) {
+                                                                // Measurement failed
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                                showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  barrierDismissible:
+                                                                      false,
+                                                                  builder:
+                                                                      (context) =>
+                                                                          AlertDialog(
+                                                                    title: const Text(
+                                                                        "Measurement Failed"),
+                                                                    content:
+                                                                        const Text(
+                                                                            "Heart rate measurement failed. Please try again."),
+                                                                    actions: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context); // Close the "Measurement Failed" dialog
+                                                                        },
+                                                                        child: const Text(
+                                                                            "OK"),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                // Measurement succeeded, close the dialog
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                              }
                                                               bluetooth
                                                                   .removeListener(
                                                                       () {}); // Clean up
@@ -283,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           );
                                                         },
                                                       );
-                                                    })
+                                                    });
                                                   },
                                                   child: const Text(
                                                     "Heart Rate",
@@ -310,10 +396,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   color: Colors.blue,
                                                 ),
                                                 child: TextButton(
-                                                  onPressed: () => {
+                                                  onPressed: () {
                                                     Navigator.pop(
-                                                        context), // Close the dialog
-                                                    // Close the dialog
+                                                        context); // Close the current dialog
                                                     Future.delayed(
                                                         Duration.zero, () {
                                                       showDialog(
@@ -343,8 +428,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                     .isMeasuring &&
                                                                 Navigator.canPop(
                                                                     context)) {
-                                                              Navigator.pop(
-                                                                  context); // Close the "Measuring..." dialog
+                                                              if (Provider.of<SensorData>(
+                                                                          context,
+                                                                          listen:
+                                                                              false)
+                                                                      .spo2 ==
+                                                                  -999) {
+                                                                // Measurement failed
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                                showDialog(
+                                                                  context:
+                                                                      context,
+                                                                  barrierDismissible:
+                                                                      false,
+                                                                  builder:
+                                                                      (context) =>
+                                                                          AlertDialog(
+                                                                    title: const Text(
+                                                                        "Measurement Failed"),
+                                                                    content:
+                                                                        const Text(
+                                                                            "SpO2 measurement failed. Please try again."),
+                                                                    actions: [
+                                                                      TextButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context); // Close the "Measurement Failed" dialog
+                                                                        },
+                                                                        child: const Text(
+                                                                            "OK"),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                // Measurement succeeded, close the dialog
+                                                                Navigator.pop(
+                                                                    context); // Close the "Measuring..." dialog
+                                                              }
                                                               bluetooth
                                                                   .removeListener(
                                                                       () {}); // Clean up
@@ -363,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           );
                                                         },
                                                       );
-                                                    })
+                                                    });
                                                   },
                                                   child: const Text(
                                                     "Spo2",
