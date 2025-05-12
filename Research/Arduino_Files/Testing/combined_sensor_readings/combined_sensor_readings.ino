@@ -168,6 +168,7 @@ void readingsHeartRateSPO2Sensor() {
         redBuffer[i] = particleSensor.getRed();
         irBuffer[i] = particleSensor.getIR();
         particleSensor.nextSample();
+        delay(5);
     }
     maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
     measuringHeart = false;
