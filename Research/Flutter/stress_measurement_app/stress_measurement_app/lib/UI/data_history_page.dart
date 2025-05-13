@@ -168,130 +168,127 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
             ),
             const SizedBox(height: 10),
             if (isGraphView && filter == "Today")
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  height: 300,
-                  width: 350,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: FutureBuilder<List<Map<String, dynamic>>>(
-                      future: dataFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(child: Text("Error: ${snapshot.error}"));
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                          return const Center(child: Text("No data available."));
-                        }
-                
-                        final data = snapshot.data!;
-                        return LineChart(
-                          LineChartData(
-                            gridData: FlGridData(
-                              show: true,
-                              drawVerticalLine: true,
-                              verticalInterval: 1,
-                              horizontalInterval: 10,
-                              getDrawingHorizontalLine: (value) => FlLine(
-                                color: Colors.grey.withOpacity(0.3),
-                                strokeWidth: 1,
-                              ),
-                              getDrawingVerticalLine: (value) => FlLine(
-                                color: Colors.grey.withOpacity(0.3),
-                                strokeWidth: 1,
-                              ),
+              SizedBox(
+                height: 300,
+                width: 350,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: dataFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Center(child: Text("No data available."));
+                      }
+
+                      final data = snapshot.data!;
+                      return LineChart(
+                        LineChartData(
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: true,
+                            verticalInterval: 1,
+                            horizontalInterval: 10,
+                            getDrawingHorizontalLine: (value) => FlLine(
+                              color: Colors.grey.withOpacity(0.3),
+                              strokeWidth: 1,
                             ),
-                            titlesData: FlTitlesData(
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 40,
-                                  getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString(),
-                                        style: const TextStyle(fontSize: 10));
-                                  },
-                                ),
-                              ),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  interval: 1,
-                                  getTitlesWidget: (value, meta) {
-                                    int index = value.toInt();
-                                    if (index >= 0 && index < data.length) {
-                                      final date =
-                                          _formatShortDate(data[index]['date']);
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 5.0),
-                                        child: Text(date,
-                                            style: const TextStyle(fontSize: 10)),
-                                      );
-                                    } else {
-                                      return const Text('');
-                                    }
-                                  },
-                                ),
-                              ),
-                              topTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false)),
-                              rightTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false)),
-                            ),
-                            borderData: FlBorderData(
-                              show: true,
-                              border: const Border(
-                                left: BorderSide(color: Colors.black),
-                                bottom: BorderSide(color: Colors.black),
-                              ),
-                            ),
-                            minX: 0,
-                            maxX: (data.length - 1).toDouble(),
-                            minY: _getMinY(widget.pageName),
-                            maxY: _getMaxY(widget.pageName),
-                            lineBarsData: [
-                              LineChartBarData(
-                                isCurved: true,
-                                barWidth: 3,
-                                dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(
-                                  show: true,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue.withOpacity(0.3),
-                                      Colors.blue.withOpacity(0.0)
-                                    ],
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                  ),
-                                ),
-                                color: Colors.blue,
-                                spots: List.generate(data.length, (i) {
-                                  final value = data[i].values.last.toDouble();
-                                  return FlSpot(i.toDouble(), value);
-                                }),
-                              ),
-                            ],
-                            lineTouchData: LineTouchData(
-                              touchTooltipData: LineTouchTooltipData(
-                                getTooltipItems: (spots) => spots.map((spot) {
-                                  final index = spot.x.toInt();
-                                  final value = spot.y;
-                                  final date = _formatDate(data[index]['day']);
-                                  return LineTooltipItem(
-                                    "$date\n${value.toStringAsFixed(1)}",
-                                    const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  );
-                                }).toList(),
-                              ),
+                            getDrawingVerticalLine: (value) => FlLine(
+                              color: Colors.grey.withOpacity(0.3),
+                              strokeWidth: 1,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(value.toInt().toString(),
+                                      style: const TextStyle(fontSize: 10));
+                                },
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                interval: 1,
+                                getTitlesWidget: (value, meta) {
+                                  int index = value.toInt();
+                                  if (index >= 0 && index < data.length) {
+                                    final date =
+                                        _formatShortDate(data[index]['date']);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Text(date,
+                                          style: const TextStyle(fontSize: 10)),
+                                    );
+                                  } else {
+                                    return const Text('');
+                                  }
+                                },
+                              ),
+                            ),
+                            topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false)),
+                          ),
+                          borderData: FlBorderData(
+                            show: true,
+                            border: const Border(
+                              left: BorderSide(color: Colors.black),
+                              bottom: BorderSide(color: Colors.black),
+                            ),
+                          ),
+                          minX: 0,
+                          maxX: (data.length - 1).toDouble(),
+                          minY: _getMinY(widget.pageName),
+                          maxY: _getMaxY(widget.pageName),
+                          lineBarsData: [
+                            LineChartBarData(
+                              isCurved: true,
+                              barWidth: 3,
+                              dotData: const FlDotData(show: true),
+                              belowBarData: BarAreaData(
+                                show: true,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.blue.withOpacity(0.3),
+                                    Colors.blue.withOpacity(0.0)
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                              ),
+                              color: Colors.blue,
+                              spots: List.generate(data.length, (i) {
+                                final value = data[i].values.last.toDouble();
+                                return FlSpot(i.toDouble(), value);
+                              }),
+                            ),
+                          ],
+                          lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (spots) => spots.map((spot) {
+                                final index = spot.x.toInt();
+                                final value = spot.y;
+                                final date = _formatDate(data[index]['day']);
+                                return LineTooltipItem(
+                                  "$date\n${value.toStringAsFixed(1)}",
+                                  const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               )
@@ -369,8 +366,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                         final dateStr = data[index]['day']
                                             .toString()
                                             .split(' ')[0];
-                                        return Text(dateStr
-                                            .substring(5)); // Shows MM-DD
+                                        return Text(dateStr.substring(5),
+                                            style: const TextStyle(
+                                                fontSize: 12)); // Shows MM-DD
                                       }),
                                 ),
                                 topTitles: const AxisTitles(
@@ -425,71 +423,93 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
                           final data = snapshot.data!;
                           print("data size: ${data.length}");
-                          return BarChart(
-                            BarChartData(
-                              barGroups: data.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final item = entry.value;
-                                final min = item['min'] as int;
-                                final max = item['max'] as int;
-                                return BarChartGroupData(
-                                  x: index,
-                                  barRods: [
-                                    BarChartRodData(
-                                      fromY: min.toDouble(),
-                                      toY: max.toDouble(),
-                                      width: 8,
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.zero,
-                                    )
-                                  ],
-                                );
-                              }).toList(),
-                              barTouchData: BarTouchData(
-                                touchTooltipData: BarTouchTooltipData(
-                                  getTooltipItem:
-                                      (group, groupIndex, rod, rodIndex) {
-                                    final reading = data[groupIndex];
-                                    return BarTooltipItem(
-                                      'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
-                                      const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    );
-                                  },
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  0.0, 6.0, 20.0, 0), // Optional
+                              child: SizedBox(
+                                width: data.length *
+                                    40.0, // Width of the chart based on the number of bars
+                                child: BarChart(
+                                  BarChartData(
+                                    barGroups:
+                                        data.asMap().entries.map((entry) {
+                                      final index = entry.key;
+                                      final item = entry.value;
+                                      final min = item['min'] as int;
+                                      final max = item['max'] as int;
+                                      return BarChartGroupData(
+                                        x: index,
+                                        barRods: [
+                                          BarChartRodData(
+                                            fromY: min.toDouble(),
+                                            toY: max.toDouble(),
+                                            width: 8,
+                                            color: Colors.blueAccent,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                    barTouchData: BarTouchData(
+                                      touchTooltipData: BarTouchTooltipData(
+                                        getTooltipItem:
+                                            (group, groupIndex, rod, rodIndex) {
+                                          final reading = data[groupIndex];
+                                          return BarTooltipItem(
+                                            'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
+                                            const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    titlesData: FlTitlesData(
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          getTitlesWidget: (value, meta) {
+                                            final index = value.toInt();
+                                            if (index < 0 ||
+                                                index >= data.length) {
+                                              return const SizedBox();
+                                            }
+                                            final dateStr = data[index]['day']
+                                                .toString()
+                                                .split(' ')[0];
+                                            return Text(
+                                              dateStr.substring(5),
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ); // Shows MM-DD
+                                          },
+                                        ),
+                                      ),
+                                      topTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false)),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize:
+                                              (widget.pageName == "GSR")
+                                                  ? 40
+                                                  : 36,
+                                        ),
+                                      ),
+                                      rightTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false)),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    gridData: const FlGridData(show: true),
+                                    minY: _getMinY(widget.pageName),
+                                    maxY: _getMaxY(widget.pageName),
+                                  ),
                                 ),
                               ),
-                              titlesData: FlTitlesData(
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                      showTitles: true,
-                                      getTitlesWidget: (value, meta) {
-                                        final index = value.toInt();
-                                        if (index < 0 || index >= data.length) {
-                                          return const SizedBox();
-                                        }
-                                        final dateStr = data[index]['day']
-                                            .toString()
-                                            .split(' ')[0];
-                                        return Text(dateStr
-                                            .substring(5)); // Shows MM-DD
-                                      }),
-                                ),
-                                topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false)),
-                                leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: (widget.pageName == "GSR")
-                                            ? 40
-                                            : 36)),
-                                rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false)),
-                              ),
-                              borderData: FlBorderData(show: false),
-                              gridData: const FlGridData(show: true),
-                              minY: _getMinY(widget.pageName),
-                              maxY: _getMaxY(widget.pageName),
                             ),
                           );
                         },
