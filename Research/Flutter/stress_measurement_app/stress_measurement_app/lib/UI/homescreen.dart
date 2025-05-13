@@ -75,7 +75,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> insertSampleDataWithDate(AppDatabase db) async {
     // Add test users
-    await db.updateRestingRespiratoryRate(12); // Max heart rate 180
+    await db.insertHeartRateUserTestingFuture(72, 0); // Day 1 AM - HR: 72
+    await db.insertHeartRateUserTestingFuture(85, 0); // Day 1 PM - HR: 145
+    await db.insertHeartRateUserTestingFuture(75, 0); // Day 2 AM - HR: 75
+    await db.insertHeartRateUserTestingFuture(90, 0); // Day 2 PM - HR: 165
+    await db.insertHeartRateUserTestingFuture(68, 0); // Day 3 AM - HR: 68
+    await db.insertHeartRateUserTestingFuture(80, 0);
+
+    await db.insertGSRUserTestingPast(1562, 0); // Day 1 AM - GSR: 25
+    await db.insertGSRUserTestingPast(1350, 0); // Day 1 PM - GSR: 350
+    await db.insertGSRUserTestingPast(1570, 0); // Day 2 AM - GSR: 30
+    await db.insertGSRUserTestingPast(1480, 0); // Day 2 PM - GSR: 400
+    await db.insertGSRUserTestingPast(1580, 0); // Day 3 AM - GSR: 34
+    await db.insertGSRUserTestingPast(1540, 0);
+
+    await db.insertSpo2UserTestingPast(98, 0); // Day 1 AM - SpO2: 98%
+    await db.insertSpo2UserTestingPast(97, 0); // Day 1 PM - SpO2: 97%
+
+    await db.insertSpo2UserTestingPast(99, 0); // Day 2 AM - SpO2: 99%
+    await db.insertSpo2UserTestingPast(98, 0); // Day 2 PM - SpO2: 98%
+
+    await db.insertSpo2UserTestingPast(98, 0); // Day 3 AM - SpO2: 98%
+    await db.insertSpo2UserTestingPast(96, 0);
+
+    await db.insertRespiratoryRatePast(
+        12, 0); // Day 1 AM - Respiratory Rate: 12 bpm
+    await db.insertRespiratoryRatePast(
+        14, 0); // Day 1 PM - Respiratory Rate: 14 bpm
+
+    await db.insertRespiratoryRatePast(
+        13, 0); // Day 2 AM - Respiratory Rate: 13 bpm
+    await db.insertRespiratoryRatePast(
+        15, 0); // Day 3 PM - GSR: 450 // Max heart rate 180
 
     print("Sample data with dates inserted!");
   }
