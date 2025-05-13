@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stress_measurement_app/Models/bluetooth.dart';
+import 'package:stress_measurement_app/Models/database.dart';
 import 'package:stress_measurement_app/Widgets/data_row.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -173,18 +174,26 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                 width: 350,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: FutureBuilder<List<Map<String, dynamic>>>(
-                    future: dataFuture,
+                  child: FutureBuilder<List<dynamic>>(
+                    future: Future.wait([
+                      dataFuture,
+                      getAverage(
+                          widget.pageName, widget.bluetooth.getDatabase()),
+                    ]),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text("Error: ${snapshot.error}"));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      } else if (!snapshot.hasData ||
+                          snapshot.data![0].isEmpty) {
                         return const Center(child: Text("No data available."));
                       }
 
-                      final data = snapshot.data!;
+                      final List<Map<String, dynamic>> data =
+                          List<Map<String, dynamic>>.from(snapshot.data![0]);
+                      final int? average = snapshot.data![1] as int?;
+
                       return LineChart(
                         LineChartData(
                           gridData: FlGridData(
@@ -286,6 +295,48 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               }).toList(),
                             ),
                           ),
+
+                          /// ✅ Add average line
+                          extraLinesData: (average != null && average != 0)
+                              ? ExtraLinesData(horizontalLines: [
+                                  // Right-side label
+                                  HorizontalLine(
+                                    y: average.toDouble(),
+                                    color: Colors.blue,
+                                    strokeWidth: 2,
+                                    dashArray: [5, 5],
+                                    label: HorizontalLineLabel(
+                                      show: true,
+                                      alignment: Alignment.bottomRight,
+                                      padding: const EdgeInsets.only(top: 4),
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      labelResolver: (_) => 'Avg: $average',
+                                    ),
+                                  ),
+                                  // Left-side label
+                                  HorizontalLine(
+                                    y: average.toDouble(),
+                                    color: Colors
+                                        .transparent, // don't draw line again
+                                    strokeWidth: 0,
+                                    label: HorizontalLineLabel(
+                                      show: true,
+                                      alignment: Alignment.bottomLeft,
+                                      padding: const EdgeInsets.only(top: 4),
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      labelResolver: (_) => 'Avg: $average',
+                                    ),
+                                  ),
+                                ])
+                              : ExtraLinesData(),
                         ),
                       );
                     },
@@ -295,16 +346,18 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
             else if (isGraphView && filter == "Last 7 days") ...[
               Column(
                 children: [
-                  const SizedBox(
-                    height: 60,
-                  ),
+                  const SizedBox(height: 60),
                   SizedBox(
                     height: 300,
                     width: 350,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: FutureBuilder<List<Map<String, dynamic>>>(
-                        future: dataFuture,
+                      child: FutureBuilder<List<dynamic>>(
+                        future: Future.wait([
+                          dataFuture,
+                          getAverage(
+                              widget.pageName, widget.bluetooth.getDatabase()),
+                        ]),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -314,12 +367,16 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                             return Center(
                                 child: Text("Error: ${snapshot.error}"));
                           } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
+                              snapshot.data![0].isEmpty) {
                             return const Center(
                                 child: Text("No data available."));
                           }
 
-                          final data = snapshot.data!;
+                          final List<Map<String, dynamic>> data =
+                              List<Map<String, dynamic>>.from(
+                                  snapshot.data![0]);
+                          final int? average = snapshot.data![1] as int?;
+
                           return BarChart(
                             BarChartData(
                               barGroups: data.asMap().entries.map((entry) {
@@ -348,8 +405,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                     return BarTooltipItem(
                                       'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
                                       const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     );
                                   },
                                 ),
@@ -357,32 +415,32 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               titlesData: FlTitlesData(
                                 bottomTitles: AxisTitles(
                                   sideTitles: SideTitles(
-                                      showTitles: true,
-                                      getTitlesWidget: (value, meta) {
-                                        final index = value.toInt();
-                                        if (index < 0 || index >= data.length) {
-                                          return const SizedBox();
-                                        }
-                                        final dateStr = data[index]['day']
-                                            .toString()
-                                            .split(' ')[0];
-                                        DateTime date = DateTime.parse(
-                                            dateStr); // Parse the date string into DateTime
-                                        String formattedDate =
-                                            DateFormat('dd-MM').format(date);
-                                        return Text(formattedDate,
-                                            style: const TextStyle(
-                                                fontSize: 12)); // Shows MM-DD
-                                      }),
+                                    showTitles: true,
+                                    getTitlesWidget: (value, meta) {
+                                      final index = value.toInt();
+                                      if (index < 0 || index >= data.length) {
+                                        return const SizedBox();
+                                      }
+                                      final dateStr = data[index]['day']
+                                          .toString()
+                                          .split(' ')[0];
+                                      DateTime date = DateTime.parse(dateStr);
+                                      String formattedDate =
+                                          DateFormat('dd-MM').format(date);
+                                      return Text(formattedDate,
+                                          style: const TextStyle(fontSize: 12));
+                                    },
+                                  ),
                                 ),
                                 topTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                                 leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: (widget.pageName == "GSR")
-                                            ? 40
-                                            : 36)),
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize:
+                                        (widget.pageName == "GSR") ? 40 : 36,
+                                  ),
+                                ),
                                 rightTitles: const AxisTitles(
                                     sideTitles: SideTitles(showTitles: false)),
                               ),
@@ -390,6 +448,50 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                               gridData: const FlGridData(show: true),
                               minY: _getMinY(widget.pageName),
                               maxY: _getMaxY(widget.pageName),
+
+                              /// ✅ Add average line here
+                              extraLinesData: (average != null && average != 0)
+                                  ? ExtraLinesData(horizontalLines: [
+                                      // Right-side label
+                                      HorizontalLine(
+                                        y: average.toDouble(),
+                                        color: Colors.blue,
+                                        strokeWidth: 2,
+                                        dashArray: [5, 5],
+                                        label: HorizontalLineLabel(
+                                          show: true,
+                                          alignment: Alignment.bottomRight,
+                                          padding:
+                                              const EdgeInsets.only(top: 4),
+                                          style: const TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          labelResolver: (_) => 'Avg: $average',
+                                        ),
+                                      ),
+                                      // Left-side label
+                                      HorizontalLine(
+                                        y: average.toDouble(),
+                                        color: Colors
+                                            .transparent, // don't draw line again
+                                        strokeWidth: 0,
+                                        label: HorizontalLineLabel(
+                                          show: true,
+                                          alignment: Alignment.bottomLeft,
+                                          padding:
+                                              const EdgeInsets.only(top: 4),
+                                          style: const TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          labelResolver: (_) => 'Avg: $average',
+                                        ),
+                                      ),
+                                    ])
+                                  : const ExtraLinesData(horizontalLines: []),
                             ),
                           );
                         },
@@ -409,8 +511,12 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                     width: 350,
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: FutureBuilder<List<Map<String, dynamic>>>(
-                        future: dataFuture,
+                      child: FutureBuilder<List<dynamic>>(
+                        future: Future.wait([
+                          dataFuture, // List<Map<String, dynamic>>
+                          getAverage(widget.pageName,
+                              widget.bluetooth.getDatabase()) // int?
+                        ]),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -420,21 +526,23 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                             return Center(
                                 child: Text("Error: ${snapshot.error}"));
                           } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
+                              snapshot.data![0].isEmpty) {
                             return const Center(
                                 child: Text("No data available."));
                           }
 
-                          final data = snapshot.data!;
-                          print("data size: ${data.length}");
+                          final List<Map<String, dynamic>> data =
+                              List<Map<String, dynamic>>.from(
+                                  snapshot.data![0]);
+                          final int? average = snapshot.data![1];
+
                           return SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  0.0, 6.0, 20.0, 0), // Optional
+                              padding:
+                                  const EdgeInsets.fromLTRB(0.0, 6.0, 20.0, 0),
                               child: SizedBox(
-                                width: data.length *
-                                    40.0, // Width of the chart based on the number of bars
+                                width: data.length * 40.0,
                                 child: BarChart(
                                   BarChartData(
                                     barGroups:
@@ -456,6 +564,54 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                         ],
                                       );
                                     }).toList(),
+                                    extraLinesData: (average != null &&
+                                            average != 0)
+                                        ? ExtraLinesData(horizontalLines: [
+                                            // Right-side label
+                                            HorizontalLine(
+                                              y: average.toDouble(),
+                                              color: Colors.blue,
+                                              strokeWidth: 2,
+                                              dashArray: [5, 5],
+                                              label: HorizontalLineLabel(
+                                                show: true,
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                padding: const EdgeInsets.only(
+                                                    top: 4),
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                labelResolver: (_) =>
+                                                    'Avg: $average',
+                                              ),
+                                            ),
+                                            // Left-side label
+                                            HorizontalLine(
+                                              y: average.toDouble(),
+                                              color: Colors
+                                                  .transparent, // don't draw line again
+                                              strokeWidth: 0,
+                                              label: HorizontalLineLabel(
+                                                show: true,
+                                                alignment: Alignment.bottomLeft,
+                                                padding: const EdgeInsets.only(
+                                                    top: 4),
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                labelResolver: (_) =>
+                                                    'Avg: $average',
+                                              ),
+                                            ),
+                                          ])
+                                        : const ExtraLinesData(
+                                            horizontalLines: []),
+                                    // Keep the rest unchanged:
                                     barTouchData: BarTouchData(
                                       touchTooltipData: BarTouchTooltipData(
                                         getTooltipItem:
@@ -471,6 +627,9 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                       ),
                                     ),
                                     titlesData: FlTitlesData(
+                                      topTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false)),
                                       bottomTitles: AxisTitles(
                                         sideTitles: SideTitles(
                                           showTitles: true,
@@ -496,21 +655,6 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                           },
                                         ),
                                       ),
-                                      topTitles: const AxisTitles(
-                                          sideTitles:
-                                              SideTitles(showTitles: false)),
-                                      leftTitles: AxisTitles(
-                                        sideTitles: SideTitles(
-                                          showTitles: true,
-                                          reservedSize:
-                                              (widget.pageName == "GSR")
-                                                  ? 40
-                                                  : 36,
-                                        ),
-                                      ),
-                                      rightTitles: const AxisTitles(
-                                          sideTitles:
-                                              SideTitles(showTitles: false)),
                                     ),
                                     borderData: FlBorderData(show: false),
                                     gridData: const FlGridData(show: true),
@@ -717,7 +861,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return 1000; // Example, adjust based on your GSR data range
       case "Spo2":
-        return 0;
+        return 80;
       case "RespitoryRate":
         return 4; // Example, adjust based on your SpO2 data range
       default:
@@ -732,11 +876,29 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
       case "GSR":
         return 2500; // Example, adjust based on your GSR data range
       case "Spo2":
-        return 140;
+        return 100;
       case "RespitoryRate":
         return 30; // Example, adjust based on your SpO2 data range
       default:
         return null; // Default maxY
+    }
+  }
+
+  Future<int?> getAverage(String pageName, AppDatabase db) {
+    switch (pageName) {
+      case "Heart Rate":
+        return db
+            .getCurrentUserAverageHeartRate(); // Adjust according to your HR data range
+      case "GSR":
+        return db
+            .getCurrentUserAverageGSR(); // Example, adjust based on your GSR data range
+      case "Spo2":
+        return Future.value(0);
+      case "RespitoryRate":
+        return db
+            .getCurrentUserRestingRespirationRate(); // Example, adjust based on your SpO2 data range
+      default:
+        return Future.value(0); // Default maxY
     }
   }
 
