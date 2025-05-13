@@ -366,8 +366,13 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                         final dateStr = data[index]['day']
                                             .toString()
                                             .split(' ')[0];
-                                        return Text(dateStr
-                                            .substring(5)); // Shows MM-DD
+                                        DateTime date = DateTime.parse(
+                                            dateStr); // Parse the date string into DateTime
+                                        String formattedDate =
+                                            DateFormat('dd-MM').format(date);
+                                        return Text(formattedDate,
+                                            style: const TextStyle(
+                                                fontSize: 12)); // Shows MM-DD
                                       }),
                                 ),
                                 topTitles: const AxisTitles(
@@ -422,71 +427,98 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
                           final data = snapshot.data!;
                           print("data size: ${data.length}");
-                          return BarChart(
-                            BarChartData(
-                              barGroups: data.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final item = entry.value;
-                                final min = item['min'] as int;
-                                final max = item['max'] as int;
-                                return BarChartGroupData(
-                                  x: index,
-                                  barRods: [
-                                    BarChartRodData(
-                                      fromY: min.toDouble(),
-                                      toY: max.toDouble(),
-                                      width: 8,
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.zero,
-                                    )
-                                  ],
-                                );
-                              }).toList(),
-                              barTouchData: BarTouchData(
-                                touchTooltipData: BarTouchTooltipData(
-                                  getTooltipItem:
-                                      (group, groupIndex, rod, rodIndex) {
-                                    final reading = data[groupIndex];
-                                    return BarTooltipItem(
-                                      'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
-                                      const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    );
-                                  },
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  0.0, 6.0, 20.0, 0), // Optional
+                              child: SizedBox(
+                                width: data.length *
+                                    40.0, // Width of the chart based on the number of bars
+                                child: BarChart(
+                                  BarChartData(
+                                    barGroups:
+                                        data.asMap().entries.map((entry) {
+                                      final index = entry.key;
+                                      final item = entry.value;
+                                      final min = item['min'] as int;
+                                      final max = item['max'] as int;
+                                      return BarChartGroupData(
+                                        x: index,
+                                        barRods: [
+                                          BarChartRodData(
+                                            fromY: min.toDouble(),
+                                            toY: max.toDouble(),
+                                            width: 8,
+                                            color: Colors.blueAccent,
+                                            borderRadius: BorderRadius.zero,
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                    barTouchData: BarTouchData(
+                                      touchTooltipData: BarTouchTooltipData(
+                                        getTooltipItem:
+                                            (group, groupIndex, rod, rodIndex) {
+                                          final reading = data[groupIndex];
+                                          return BarTooltipItem(
+                                            'Min: ${_formatMinMeasurement(reading)}\nMax: ${_formatMaxMeasurement(reading)}',
+                                            const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    titlesData: FlTitlesData(
+                                      bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          getTitlesWidget: (value, meta) {
+                                            final index = value.toInt();
+                                            if (index < 0 ||
+                                                index >= data.length) {
+                                              return const SizedBox();
+                                            }
+                                            final dateStr = data[index]['day']
+                                                .toString()
+                                                .split(' ')[0];
+                                            DateTime date = DateTime.parse(
+                                                dateStr); // Parse the date string into DateTime
+                                            String formattedDate =
+                                                DateFormat('dd-MM')
+                                                    .format(date);
+                                            return Text(
+                                              formattedDate,
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ); // Shows MM-DD
+                                          },
+                                        ),
+                                      ),
+                                      topTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false)),
+                                      leftTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize:
+                                              (widget.pageName == "GSR")
+                                                  ? 40
+                                                  : 36,
+                                        ),
+                                      ),
+                                      rightTitles: const AxisTitles(
+                                          sideTitles:
+                                              SideTitles(showTitles: false)),
+                                    ),
+                                    borderData: FlBorderData(show: false),
+                                    gridData: const FlGridData(show: true),
+                                    minY: _getMinY(widget.pageName),
+                                    maxY: _getMaxY(widget.pageName),
+                                  ),
                                 ),
                               ),
-                              titlesData: FlTitlesData(
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                      showTitles: true,
-                                      getTitlesWidget: (value, meta) {
-                                        final index = value.toInt();
-                                        if (index < 0 || index >= data.length) {
-                                          return const SizedBox();
-                                        }
-                                        final dateStr = data[index]['day']
-                                            .toString()
-                                            .split(' ')[0];
-                                        return Text(dateStr
-                                            .substring(5)); // Shows MM-DD
-                                      }),
-                                ),
-                                topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false)),
-                                leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: (widget.pageName == "GSR")
-                                            ? 40
-                                            : 36)),
-                                rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false)),
-                              ),
-                              borderData: FlBorderData(show: false),
-                              gridData: const FlGridData(show: true),
-                              minY: _getMinY(widget.pageName),
-                              maxY: _getMaxY(widget.pageName),
                             ),
                           );
                         },
@@ -716,7 +748,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
   String _formatShortDate(String date) {
     final DateTime dateTime = DateTime.parse(date);
-    final DateFormat formatter = DateFormat('MM-dd');
+    final DateFormat formatter = DateFormat('dd-MM');
     return formatter.format(dateTime);
   }
 }
