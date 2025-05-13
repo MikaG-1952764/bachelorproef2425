@@ -75,51 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> insertSampleDataWithDate(AppDatabase db) async {
     // Add test users
-    await db.updateAverageGSR(1586);
-    await db.updateAverageHeartRate(62); // Max heart rate 180
-
-    print('current user: ${await db.getCurrentUser()}');
-
-    // Insert heart rate data for the users with dates
-    // Week 1
-    await db.insertHeartRateUserTestingFuture(72, 0); // Day 1 AM - HR: 72
-    await db.insertHeartRateUserTestingFuture(85, 0); // Day 1 PM - HR: 145
-    await db.insertHeartRateUserTestingFuture(75, 0); // Day 2 AM - HR: 75
-    await db.insertHeartRateUserTestingFuture(90, 0); // Day 2 PM - HR: 165
-    await db.insertHeartRateUserTestingFuture(68, 0); // Day 3 AM - HR: 68
-    await db.insertHeartRateUserTestingFuture(80, 0); // Day 3 PM - HR: 155
-
-    // Insert GSR data for the users with dates
-    // Week 1
-    await db.insertGSRUserTestingFuture(1562, 0); // Day 1 AM - GSR: 25
-    await db.insertGSRUserTestingFuture(1350, 0); // Day 1 PM - GSR: 350
-    await db.insertGSRUserTestingFuture(1570, 0); // Day 2 AM - GSR: 30
-    await db.insertGSRUserTestingFuture(1480, 0); // Day 2 PM - GSR: 400
-    await db.insertGSRUserTestingFuture(
-        1580, 1); // Day 3 AM - GSR: 34 // Day 7 PM - GSR: 700
-
-    await db.insertSpo2UserTestingFuture(98, 0); // Day 1 AM - SpO2: 98%
-    await db.insertSpo2UserTestingFuture(97, 0); // Day 1 PM - SpO2: 97%
-    await db.insertSpo2UserTestingFuture(99, 0); // Day 2 AM - SpO2: 99%
-    await db.insertSpo2UserTestingFuture(98, 0); // Day 2 PM - SpO2: 98%
-
-    await db.insertSpo2UserTestingFuture(98, 0); // Day 3 AM - SpO2: 98%
-    await db.insertSpo2UserTestingFuture(96, 0); // Day 3 PM - SpO2: 96%
-
-    await db.insertRespiratoryRateFuture(
-        12, 0); // Day 1 AM - Respiratory Rate: 12 bpm
-    await db.insertRespiratoryRateFuture(
-        14, 0); // Day 1 PM - Respiratory Rate: 14 bpm
-
-    await db.insertRespiratoryRateFuture(
-        13, 0); // Day 2 AM - Respiratory Rate: 13 bpm
-    await db.insertRespiratoryRateFuture(
-        15, 0); // Day 2 PM - Respiratory Rate: 15 bpm
-
-    await db.insertRespiratoryRateFuture(
-        14, 0); // Day 3 AM - Respiratory Rate: 14 bpm
-    await db.insertRespiratoryRateFuture(
-        16, 0); // Day 3 PM - Respiratory Rate: 16 bpm
+    await db.updateRestingRespiratoryRate(12); // Max heart rate 180
 
     print("Sample data with dates inserted!");
   }
