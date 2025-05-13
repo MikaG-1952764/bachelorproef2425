@@ -671,7 +671,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               print("Average GSR out of database: ${avgGSR}");
                             }),
                       ),*/
-                      const SizedBox(height: 20),
                       SizedBox(
                         width: 300,
                         height: 60,

@@ -428,7 +428,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                       String formattedDate =
                                           DateFormat('dd-MM').format(date);
                                       return Text(formattedDate,
-                                          style: const TextStyle(fontSize: 12));
+                                          style: const TextStyle(fontSize: 10));
                                     },
                                   ),
                                 ),

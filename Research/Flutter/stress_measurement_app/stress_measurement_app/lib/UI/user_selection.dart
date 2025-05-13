@@ -166,7 +166,7 @@ class UserSelection extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            /*const SizedBox(height: 20),
             SizedBox(
               width: 300,
               height: 50,
@@ -178,7 +178,7 @@ class UserSelection extends StatelessWidget {
                       const SnackBar(content: Text("All data deleted")),
                     );
                   }),
-            )
+            )*/
           ],
         ),
       ),
