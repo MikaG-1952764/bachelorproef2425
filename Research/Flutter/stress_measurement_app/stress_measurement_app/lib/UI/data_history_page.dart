@@ -366,7 +366,11 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                         final dateStr = data[index]['day']
                                             .toString()
                                             .split(' ')[0];
-                                        return Text(dateStr.substring(5),
+                                        DateTime date = DateTime.parse(
+                                            dateStr); // Parse the date string into DateTime
+                                        String formattedDate =
+                                            DateFormat('dd-MM').format(date);
+                                        return Text(formattedDate,
                                             style: const TextStyle(
                                                 fontSize: 12)); // Shows MM-DD
                                       }),
@@ -479,8 +483,13 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                                             final dateStr = data[index]['day']
                                                 .toString()
                                                 .split(' ')[0];
+                                            DateTime date = DateTime.parse(
+                                                dateStr); // Parse the date string into DateTime
+                                            String formattedDate =
+                                                DateFormat('dd-MM')
+                                                    .format(date);
                                             return Text(
-                                              dateStr.substring(5),
+                                              formattedDate,
                                               style:
                                                   const TextStyle(fontSize: 12),
                                             ); // Shows MM-DD
@@ -739,7 +748,7 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
 
   String _formatShortDate(String date) {
     final DateTime dateTime = DateTime.parse(date);
-    final DateFormat formatter = DateFormat('MM-dd');
+    final DateFormat formatter = DateFormat('dd-MM');
     return formatter.format(dateTime);
   }
 }
