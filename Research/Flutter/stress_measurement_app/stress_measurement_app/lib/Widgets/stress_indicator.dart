@@ -50,6 +50,9 @@ class StressIndicator extends StatelessWidget {
     final averageGsrValue = await averageGsr();
     final latestRespiratoryRate = await respiratoryRate();
     final restingRepsiratoryRate = await restingRespiratory();
+    print('averageGsr: ${await database.getCurrentUserAverageGSR()}');
+    print(
+        'averageHeartRate: ${await database.getCurrentUserAverageHeartRate()}');
     if (latestGsrValue >= (1.10 * averageGsrValue!) ||
         latestRespiratoryRate! >= (restingRepsiratoryRate! * 1.30)) {
       return Colors.red;
