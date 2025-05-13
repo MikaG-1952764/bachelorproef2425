@@ -58,8 +58,21 @@ class RespiratoryRate extends Table {
     tables: [Users, HeartRate, GSR, SPO2, StressLevel, RespiratoryRate])
 class AppDatabase extends _$AppDatabase {
   Future<void> setCurrentUser(String username) async {
-    userName = username;
-    userId = await getUserIdFromUsername(username);
+    final id = await getUserIdFromUsername(username);
+    if (id != null) {
+      var currentUser = await getUserById(id);
+      userName = currentUser!.name;
+      userId = currentUser!.id;
+    } else {
+      // Handle error if username doesn't exist
+      print('User "$username" not found.');
+    }
+  }
+
+  Future<User?> getUserById(int id) async {
+    final result =
+        await (select(users)..where((t) => t.id.equals(id))).getSingleOrNull();
+    return result;
   }
 
   AppDatabase() : super(_openConnection());
@@ -640,5 +653,125 @@ class AppDatabase extends _$AppDatabase {
     });
 
     return dailyMinMaxRespiratoryRates;
+  }
+
+  Future<int> insertHeartRateUserTestingPast(
+      int measuredHeartRate, int daysToSubstract) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.subtract(Duration(days: daysToSubstract));
+    return into(heartRate).insert(
+      HeartRateCompanion(
+        userId: Value(userId!),
+        heartRate: Value(measuredHeartRate),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertHeartRateUserTestingFuture(
+      int measuredHeartRate, int daysToAdd) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.add(Duration(days: daysToAdd));
+    return into(heartRate).insert(
+      HeartRateCompanion(
+        userId: Value(userId!),
+        heartRate: Value(measuredHeartRate),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertGSRUserTestingPast(
+      int measuredGSR, int daysToSubstract) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.subtract(Duration(days: daysToSubstract));
+    return into(gsr).insert(
+      GSRCompanion(
+        userId: Value(userId!),
+        gsr: Value(measuredGSR),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertGSRUserTestingFuture(int measuredGSR, int daysToAdd) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.add(Duration(days: daysToAdd));
+    return into(gsr).insert(
+      GSRCompanion(
+        userId: Value(userId!),
+        gsr: Value(measuredGSR),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertSpo2UserTestingPast(
+      int measuredSpo2, int daysToSubstract) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.subtract(Duration(days: daysToSubstract));
+    return into(spo2).insert(
+      SPO2Companion(
+        userId: Value(userId!),
+        spo2: Value(measuredSpo2),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertSpo2UserTestingFuture(
+      int measuredSpo2, int daysToAdd) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.add(Duration(days: daysToAdd));
+    return into(spo2).insert(
+      SPO2Companion(
+        userId: Value(userId!),
+        spo2: Value(measuredSpo2),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertRespiratoryRatePast(
+      int measuredRespiratoryRate, int daysToSubstract) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.subtract(Duration(days: daysToSubstract));
+    return into(respiratoryRate).insert(
+      RespiratoryRateCompanion(
+        userId: Value(userId!),
+        respiratoryRate: Value(measuredRespiratoryRate),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertRespiratoryRateFuture(
+      int measuredRespiratoryRate, int daysToAdd) async {
+    DateTime dateNow = DateTime.now();
+    DateTime newDate = dateNow.subtract(Duration(days: daysToAdd));
+    return into(respiratoryRate).insert(
+      RespiratoryRateCompanion(
+        userId: Value(userId!),
+        respiratoryRate: Value(measuredRespiratoryRate),
+        createdAt: Value(newDate), // Includes both date and time
+      ),
+    );
+  }
+
+  Future<int> insertUserUserTesting(
+      String name,
+      int maxHeartRateCalculated,
+      int averageHeartRateMeasured,
+      int averageGSRMeasured,
+      int restingRespiratoryRateMeasured) async {
+    return into(users).insert(
+      UsersCompanion(
+        name: Value(name),
+        maxHeartRate: Value(maxHeartRateCalculated),
+        averageHeartRate: Value(averageHeartRateMeasured),
+        averageGSR: Value(averageGSRMeasured),
+        restingRespiratoryRate: Value(restingRespiratoryRateMeasured),
+      ),
+    );
   }
 }
