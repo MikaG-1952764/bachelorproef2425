@@ -711,29 +711,31 @@ class _DataHistoryPageState extends State<DataHistoryPage> {
                 ],
               ),
               Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: dataFuture, // Fetch latest 10 readings
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}");
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text("No data available.");
-                    }
-
-                    final readings = snapshot.data!;
-                    return Column(
-                      children: readings.asMap().entries.map((entry) {
-                        final reading = entry.value;
-                        return DataRowMinMaxWidget(
-                          date: _formatDate(reading['day']),
-                          min: _formatMinMeasurement(reading),
-                          max: _formatMaxMeasurement(reading),
-                        );
-                      }).toList(),
-                    );
-                  },
+                child: SingleChildScrollView(
+                  child: FutureBuilder<List<Map<String, dynamic>>>(
+                    future: dataFuture, // Fetch latest 10 readings
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text("Error: ${snapshot.error}");
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text("No data available.");
+                      }
+                  
+                      final readings = snapshot.data!;
+                      return Column(
+                        children: readings.asMap().entries.map((entry) {
+                          final reading = entry.value;
+                          return DataRowMinMaxWidget(
+                            date: _formatDate(reading['day']),
+                            min: _formatMinMeasurement(reading),
+                            max: _formatMaxMeasurement(reading),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
                 ),
               )
             ] else ...[
